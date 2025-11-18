@@ -8,10 +8,10 @@ function Navbar() {
   return (
     <nav style={{ padding: '10px', background: '#eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <div style={{ fontSize: 24, color: '#007bff' }}><strong>ChatMe</strong></div>
-      <div style={{ display: 'flex', gap: 10 }}>
+      <div style={{ display: 'flex', gap: 12 }}>
         <Link to="/register">Rejestracja</Link>
         <Link to="/login">Logowanie</Link>
-        <Link to="/profile">Profil (Test JWT)</Link>
+        <Link to="/profile">Twój Profil</Link>
       </div>
     </nav>
   );

@@ -27,9 +27,9 @@ function ProfilePage() {
   }
 
   return (
-    <div>
-      <h2>Twój Profil (Dane z serwera)</h2>
-      <pre>{JSON.stringify(profileData, null, 2)}</pre>
+    <div className='container'>
+      <h2>Twój Profil</h2>
+      <div style={{ textAlign: 'center', fontSize: '20px', fontWeight: 'bold' }}>Witaj {profileData.user.username}!</div>
     </div>
   );
 }

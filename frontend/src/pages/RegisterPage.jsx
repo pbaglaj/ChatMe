@@ -23,7 +23,7 @@ function RegisterPage() {
       <h2>Rejestracja</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Użytkownik:</label>
+          <label>Nazwa Użytkownika:</label>
           <input 
             type="text" 
             value={username} 
