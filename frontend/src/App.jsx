@@ -2,15 +2,17 @@ import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
-import ProfilePage from './pages/ProfilePage'; // Strona do testowania JWT
+import ProfilePage from './pages/ProfilePage';
 
-// Prosty komponent nawigacyjny
 function Navbar() {
   return (
-    <nav style={{ padding: '10px', background: '#eee' }}>
-      <Link to="/register" style={{ margin: '0 10px' }}>Rejestracja</Link>
-      <Link to="/login" style={{ margin: '0 10px' }}>Logowanie</Link>
-      <Link to="/profile" style={{ margin: '0 10px' }}>Profil (Test JWT)</Link>
+    <nav style={{ padding: '10px', background: '#eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ fontSize: 24, color: '#007bff' }}><strong>ChatMe</strong></div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <Link to="/register">Rejestracja</Link>
+        <Link to="/login">Logowanie</Link>
+        <Link to="/profile">Profil (Test JWT)</Link>
+      </div>
     </nav>
   );
 }

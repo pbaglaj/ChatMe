@@ -6,20 +6,17 @@ function ProfilePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Ta funkcja uruchomi się automatycznie po załadowaniu komponentu
     const fetchProfile = async () => {
       try {
-        // Nasz interceptor z api.js automatycznie dołączy token
         const response = await api.get('/profile');
-        setProfileData(response.data); // Ustaw dane profilu
+        setProfileData(response.data);
       } catch (err) {
-        // Jeśli token jest zły lub go nie ma, serwer zwróci błąd 401
         setError(err.response.data.message || 'Nie masz autoryzacji');
       }
     };
 
     fetchProfile();
-  }, []); // Pusta tablica oznacza, że useEffect uruchomi się tylko raz
+  }, []);
 
   if (error) {
     return <p style={{ color: 'red' }}>{error}</p>;
@@ -29,7 +26,6 @@ function ProfilePage() {
     return <p>Ładowanie danych profilu...</p>;
   }
 
-  // Pokaż dane zwrócone z chronionego endpointu /profile
   return (
     <div>
       <h2>Twój Profil (Dane z serwera)</h2>
