@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 function RegisterPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     try {
-      // Wyślij dane do backendu
       const response = await api.post('/register', { username, password });
       setMessage(response.data.message);
+      setTimeout(() => {
+        navigate('/login');
+      }, 1000);
     } catch (error) {
       setMessage(error.response.data.message || 'Wystąpił błąd');
     }

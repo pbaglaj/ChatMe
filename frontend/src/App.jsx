@@ -1,35 +1,30 @@
 import React from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
-
-function Navbar() {
-  return (
-    <nav style={{ padding: '10px', background: '#eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div style={{ fontSize: 24, color: '#007bff' }}><strong>ChatMe</strong></div>
-      <div style={{ display: 'flex', gap: 12 }}>
-        <Link to="/register">Rejestracja</Link>
-        <Link to="/login">Logowanie</Link>
-        <Link to="/profile">Twój Profil</Link>
-      </div>
-    </nav>
-  );
-}
+import ChatPage from './pages/ChatPage';
+import Navbar from './components/Navbar';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <Navbar />
       <div style={{ padding: '20px' }}>
         <Routes>
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/logout" element={<h2>Wylogowano pomyślnie.</h2>} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:user_id" element={<ProfilePage />} />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/chat/:id" element={<ChatPage />} />
           <Route path="/" element={<h2>Witaj! Wybierz opcję z menu.</h2>} />
+          <Route path="*" element={<h2>Strona nie znaleziona</h2>} />
         </Routes>
       </div>
-    </>
+    </AuthProvider>
   );
 }
 

@@ -1,27 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     try {
       const response = await api.post('/login', { username, password });
       
-      // Zapisz token w localStorage
-      localStorage.setItem('token', response.data.token);
-      
       setMessage('Zalogowano pomyślnie! Przekierowuję...');
       
-      setTimeout(() => navigate('/profile'), 1000); 
+      setTimeout(() => {
+        login(response.data.token);
+      }, 1000); 
 
     } catch (error) {
-      setMessage(error.response.data.message || 'Wystąpił błąd');
+      setMessage(error.response?.data?.message || 'Wystąpił błąd');
     }
   };
 
