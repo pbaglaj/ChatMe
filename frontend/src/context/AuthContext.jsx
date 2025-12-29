@@ -30,7 +30,6 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.setItem('token', token);
         try {
             const response = await api.get('/profile');
-            console.log("Login profile response:", response.data); // Debug log
             setUser(response.data.user);
             navigate(`/profile/${response.data.user.user_id}`);
         } catch (error) {

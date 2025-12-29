@@ -15,13 +15,13 @@ function App() {
         <Routes>
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/logout" element={<h2>Wylogowano pomyślnie.</h2>} />
+          <Route path="/logout" element={<h2>Logout successful.</h2>} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:user_id" element={<ProfilePage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/chat/:id" element={<ChatPage />} />
-          <Route path="/" element={<h2>Witaj! Wybierz opcję z menu.</h2>} />
-          <Route path="*" element={<h2>Strona nie znaleziona</h2>} />
+          <Route path="/" element={<h2>Welcome! Please choose an option from the menu.</h2>} />
+          <Route path="*" element={<h2>Page not found</h2>} />
         </Routes>
       </div>
     </AuthProvider>

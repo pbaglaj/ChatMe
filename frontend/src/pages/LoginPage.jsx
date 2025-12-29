@@ -15,14 +15,14 @@ function LoginPage() {
     try {
       const response = await api.post('/login', { username, password });
       
-      setMessage('Zalogowano pomyślnie! Przekierowuję...');
+      setMessage('Login successful! Redirecting...');
       
       setTimeout(() => {
         login(response.data.token);
       }, 1000); 
 
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Wystąpił błąd');
+      setMessage(error.response?.data?.message || 'An error occurred during login.');
     }
   };
 
@@ -31,7 +31,7 @@ function LoginPage() {
       <h2>Logowanie</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Użytkownik:</label>
+          <label>Username:</label>
           <input 
             type="text" 
             value={username} 
@@ -39,14 +39,14 @@ function LoginPage() {
           />
         </div>
         <div>
-          <label>Hasło:</label>
+          <label>Password:</label>
           <input 
             type="password" 
             value={password} 
             onChange={(e) => setPassword(e.target.value)} 
           />
         </div>
-        <button type="submit">Zaloguj</button>
+        <button type="submit">Login</button>
       </form>
       {message && <p>{message}</p>}
     </div>

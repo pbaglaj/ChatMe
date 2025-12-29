@@ -11,14 +11,14 @@ function Navbar() {
       <div style={{ display: 'flex', gap: 12 }}>
         {isLoggedIn ? (
           <>
-            <Link onClick={logout} to="/login">Wyloguj</Link>
-            <Link to={`/profile/${user?.user_id}`}>Twój Profil</Link>
-            <Link to="/chat">Czat</Link>
+            <Link onClick={logout} to="/login">Logout</Link>
+            <Link to={`/profile/${user?.user_id}`}>Your Profile</Link>
+            <Link to="/chat">Chat</Link>
           </>
         ) : (
           <>
-            <Link to ="/register">Rejestracja</Link>
-            <Link to="/login">Logowanie</Link>
+            <Link to ="/register">Register</Link>
+            <Link to="/login">Login</Link>
           </>
         )}
       </div>

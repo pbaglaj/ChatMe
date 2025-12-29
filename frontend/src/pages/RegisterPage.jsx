@@ -18,16 +18,16 @@ function RegisterPage() {
         navigate('/login');
       }, 1000);
     } catch (error) {
-      setMessage(error.response.data.message || 'Wystąpił błąd');
+      setMessage(error.response.data.message || 'An error occurred during registration.');
     }
   };
 
   return (
     <div>
-      <h2>Rejestracja</h2>
+      <h2>Registration</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Nazwa Użytkownika:</label>
+          <label>Username:</label>
           <input 
             type="text" 
             value={username} 
@@ -35,14 +35,14 @@ function RegisterPage() {
           />
         </div>
         <div>
-          <label>Hasło:</label>
+          <label>Password:</label>
           <input 
             type="password" 
             value={password} 
             onChange={(e) => setPassword(e.target.value)} 
           />
         </div>
-        <button type="submit">Zarejestruj</button>
+        <button type="submit">Register</button>
       </form>
       {message && <p>{message}</p>}
     </div>
