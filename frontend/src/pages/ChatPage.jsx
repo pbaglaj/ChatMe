@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../services/api";
+import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
+
+const SOCKET_URL = "http://localhost:5000";
 
 function ChatPage() {
     const { id } = useParams(); // id is the room name
@@ -12,9 +14,10 @@ function ChatPage() {
     const [messages, setMessages] = useState([]);
     const [messageInput, setMessageInput] = useState("");
     const [error, setError] = useState("");
+    const [isConnected, setIsConnected] = useState(false);
     const chatMessagesRef = useRef(null);
+    const socketRef = useRef(null);
 
-    // Przekierowanie na login jeśli użytkownik nie jest zalogowany
     useEffect(() => {
         if (!isLoggedIn) {
             navigate('/login');
@@ -34,19 +37,36 @@ function ChatPage() {
     useEffect(() => {
         if (!isJoined || !room) return;
 
-        const fetchMessages = async () => {
-            try {
-                const res = await api.get(`/messages?room=${room}`);
-                setMessages(res.data);
-            } catch (err) {
-                console.error("Error fetching messages", err);
-            }
+        socketRef.current = io(SOCKET_URL, {
+            transports: ['websocket', 'polling']
+        });
+
+        const socket = socketRef.current;
+
+        socket.on('connect', () => {
+            console.log('Connected to WebSocket');
+            setIsConnected(true);
+            socket.emit('joinRoom', room);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from WebSocket');
+            setIsConnected(false);
+        });
+
+        socket.on('messageHistory', (history) => {
+            setMessages(history);
+        });
+
+        socket.on('message', (message) => {
+            setMessages((prev) => [...prev, message]);
+        });
+
+        return () => {
+            socket.emit('leaveRoom', room);
+            socket.disconnect();
+            socketRef.current = null;
         };
-
-        fetchMessages(); // Initial fetch
-        const interval = setInterval(fetchMessages, 2000); // Poll every 2s
-
-        return () => clearInterval(interval);
     }, [isJoined, room]);
 
     useEffect(() => {
@@ -61,23 +81,17 @@ function ChatPage() {
         }
     };
 
-    const handleSendMessage = async (e) => {
+    const handleSendMessage = (e) => {
         e.preventDefault();
-        if (!messageInput.trim()) return;
+        if (!messageInput.trim() || !socketRef.current) return;
 
-        try {
-            await api.post('/messages', {
-                room,
-                message: messageInput,
-                username: user?.username || "Anonymous"
-            });
-            setMessageInput("");
-            // Fetch immediately to show the new message
-            const res = await api.get(`/messages?room=${room}`);
-            setMessages(res.data);
-        } catch (err) {
-            console.error("Error sending message", err);
-        }
+        socketRef.current.emit('chatMessage', {
+            room,
+            message: messageInput,
+            username: user?.username || "Anonymous"
+        });
+        
+        setMessageInput("");
     };
 
     if (error) {
@@ -88,16 +102,16 @@ function ChatPage() {
         return (
             <>
                 <div id="login-screen">
-                    <h2>Dołącz do czatu</h2>
+                    <h2>Join the chat</h2>
                     <input 
                         type="text" 
                         id="room" 
-                        placeholder="Nazwa pokoju..." 
+                        placeholder="Room name..." 
                         value={room}
                         onChange={(e) => setRoom(e.target.value)}
                         required 
                     />
-                    <button id="join-btn" onClick={handleJoin}>Wejdź do pokoju</button>
+                    <button id="join-btn" onClick={handleJoin}>Join Room</button>
                 </div>
                 <div id="chat-screen" style={{ display: 'none' }}></div>
             </>
@@ -108,8 +122,13 @@ function ChatPage() {
         <>
             <div id="login-screen" style={{ display: 'none' }}></div>
             <div id="chat-screen">
-                <h2 id="room-name-display">Pokój: {room}</h2>
-                <p style={{ color: '#666', marginBottom: 10 }}>Zalogowany jako: <strong>{user?.username}</strong></p>
+                <h2 id="room-name-display">Room: {room}</h2>
+                <p style={{ color: '#666', marginBottom: 10 }}>
+                    Logged in as: <strong>{user?.username}</strong>
+                    <span style={{ marginLeft: 10, color: isConnected ? '#28a745' : '#dc3545' }}>
+                        ● {isConnected ? 'Connected' : 'Disconnected'}
+                    </span>
+                </p>
                 <div 
                     id="chat-messages" 
                     ref={chatMessagesRef}
@@ -152,12 +171,12 @@ function ChatPage() {
                     <input 
                         type="text" 
                         id="msg" 
-                        placeholder="Wpisz wiadomość..." 
+                        placeholder="Type a message..." 
                         value={messageInput}
                         onChange={(e) => setMessageInput(e.target.value)}
                         required 
                     />
-                    <button type="submit">Wyślij</button>
+                    <button type="submit">Send</button>
                 </form>
             </div>
         </>
