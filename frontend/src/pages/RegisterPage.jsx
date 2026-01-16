@@ -18,7 +18,7 @@ function RegisterPage() {
         navigate('/login');
       }, 1000);
     } catch (error) {
-      setMessage(error.response.data.message || 'An error occurred during registration.');
+      setMessage(error.response?.data?.message || 'An error occurred during registration.');
     }
   };
 
