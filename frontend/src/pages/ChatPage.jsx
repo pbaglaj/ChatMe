@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
+import "./ChatPage.css";
 
 const SOCKET_URL = "http://localhost:5000";
 
@@ -95,7 +96,7 @@ function ChatPage() {
     };
 
     if (error) {
-        return <p style={{ color: 'red' }}>{error}</p>;
+        return <p className="chat-error">{error}</p>;
     }
 
     if (!isJoined) {
@@ -113,54 +114,42 @@ function ChatPage() {
                     />
                     <button id="join-btn" onClick={handleJoin}>Join Room</button>
                 </div>
-                <div id="chat-screen" style={{ display: 'none' }}></div>
+                <div id="chat-screen" className="chat-hidden"></div>
             </>
         );
     }
 
     return (
         <>
-            <div id="login-screen" style={{ display: 'none' }}></div>
+            <div id="login-screen" className="chat-hidden"></div>
             <div id="chat-screen">
                 <h2 id="room-name-display">Room: {room}</h2>
-                <p style={{ color: '#666', marginBottom: 10 }}>
+                <p className="chat-user-info">
                     Logged in as: <strong>{user?.username}</strong>
-                    <span style={{ marginLeft: 10, color: isConnected ? '#28a745' : '#dc3545' }}>
+                    <span className={`chat-status ${isConnected ? 'connected' : 'disconnected'}`}>
                         ● {isConnected ? 'Connected' : 'Disconnected'}
                     </span>
                 </p>
                 <div 
                     id="chat-messages" 
                     ref={chatMessagesRef}
-                    style={{ height: '300px', overflowY: 'scroll', border: '1px solid #ddd', padding: 10, marginBottom: 10, background: '#fafafa' }}
+                    className="chat-messages"
                 >
                     {messages.map((msg, index) => {
                         const isOwnMessage = msg.user === user?.username;
                         return (
                             <div 
                                 key={index} 
-                                className={`message ${msg.user === 'System' ? 'system-msg' : 'user-msg'}`}
-                                style={{
-                                    textAlign: isOwnMessage ? 'right' : 'left',
-                                    marginBottom: 8
-                                }}
+                                className={`chat-message ${msg.user === 'System' ? 'system-msg' : 'user-msg'} ${isOwnMessage ? 'own' : 'other'}`}
                             >
                                 {msg.user === 'System' ? (
-                                    <p style={{ color: '#888', fontStyle: 'italic' }}>{msg.text}</p>
+                                    <p className="chat-system-text">{msg.text}</p>
                                 ) : (
-                                    <div style={{
-                                        display: 'inline-block',
-                                        padding: '8px 12px',
-                                        borderRadius: 12,
-                                        background: isOwnMessage ? '#007bff' : '#e9ecef',
-                                        color: isOwnMessage ? '#fff' : '#000',
-                                        maxWidth: '70%',
-                                        textAlign: 'left'
-                                    }}>
-                                        <p className="meta" style={{ fontSize: 11, marginBottom: 4, opacity: 0.8 }}>
+                                    <div className={`chat-bubble ${isOwnMessage ? 'own' : 'other'}`}>
+                                        <p className="chat-meta">
                                             {msg.user} <span>{msg.time ? new Date(msg.time).toLocaleTimeString() : ''}</span>
                                         </p>
-                                        <p className="text" style={{ margin: 0 }}>{msg.text}</p>
+                                        <p className="chat-text">{msg.text}</p>
                                     </div>
                                 )}
                             </div>
