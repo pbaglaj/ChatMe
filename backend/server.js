@@ -146,6 +146,26 @@ app.get('/rooms', (req, res) => {
     res.json(rooms);
 });
 
+app.get('/rooms/search', (req, res) => {
+    const { q } = req.query;
+    
+    if (!q || q.trim() === '') {
+        return res.status(400).json({ message: 'Search query is required' });
+    }
+    
+    const pattern = q.toLowerCase();
+    const foundRooms = rooms.filter(r => 
+        r.name.toLowerCase().includes(pattern) || 
+        r.description.toLowerCase().includes(pattern)
+    );
+    
+    res.json({ 
+        query: q,
+        count: foundRooms.length,
+        rooms: foundRooms 
+    });
+});
+
 app.get('/rooms/:id', (req, res) => {
     const roomId = parseInt(req.params.id);
     const room = rooms.find(r => r.id === roomId);
@@ -234,26 +254,6 @@ app.get('/users/search', authMiddleware, async (req, res) => {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
     }
-});
-
-app.get('/rooms/search', (req, res) => {
-    const { q } = req.query;
-    
-    if (!q || q.trim() === '') {
-        return res.status(400).json({ message: 'Search query is required' });
-    }
-    
-    const pattern = q.toLowerCase();
-    const foundRooms = rooms.filter(r => 
-        r.name.toLowerCase().includes(pattern) || 
-        r.description.toLowerCase().includes(pattern)
-    );
-    
-    res.json({ 
-        query: q,
-        count: foundRooms.length,
-        rooms: foundRooms 
-    });
 });
 
 app.get('/profile', authMiddleware, async (req, res) => {

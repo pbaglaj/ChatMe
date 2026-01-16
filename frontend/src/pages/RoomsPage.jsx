@@ -112,26 +112,6 @@ function RoomsPage() {
             
             {message && <p className="rooms-message">{message}</p>}
 
-            <div className="rooms-search-section">
-                <h3>Search Rooms</h3>
-                <form onSubmit={handleSearch} className="rooms-search-form">
-                    <input
-                        type="text"
-                        placeholder="Search pattern (e.g. 'gen' finds 'General')"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="rooms-search-input"
-                    />
-                    <button type="submit">Search</button>
-                    <button type="button" onClick={() => { setSearchQuery(''); setSearchResults(null); }}>Clear</button>
-                </form>
-                {searchResults && (
-                    <p className="rooms-search-results">
-                        Found <strong>{searchResults.count}</strong> room(s) matching "<em>{searchResults.query}</em>"
-                    </p>
-                )}
-            </div>
-
             {isLoggedIn && (
                 <div className="rooms-create-section">
                     <h3>Create New Room</h3>
@@ -159,6 +139,26 @@ function RoomsPage() {
                     </form>
                 </div>
             )}
+
+            <div className="rooms-search-section">
+                <h3>Search Rooms</h3>
+                <form onSubmit={handleSearch} className="rooms-search-form">
+                    <input
+                        type="text"
+                        placeholder="Search pattern (e.g. 'gen' finds 'General')"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="rooms-search-input"
+                    />
+                    <button type="submit">Search</button>
+                    <button type="button" onClick={() => { setSearchQuery(''); setSearchResults(null); }}>Clear</button>
+                </form>
+                {searchResults && (
+                    <p className="rooms-search-results">
+                        Found <strong>{searchResults.count}</strong> room(s) matching "<em>{searchResults.query}</em>"
+                    </p>
+                )}
+            </div>
 
             {editingRoom && (
                 <div className="rooms-edit-section">
