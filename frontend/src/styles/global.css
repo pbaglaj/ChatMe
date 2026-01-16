@@ -24,10 +24,11 @@ button {
     padding: 10px 15px;
     cursor: pointer;
     border-radius: 5px;
+    transition: filter 0.2s ease;
 }
 
 button:hover {
-    background-color: #0056b3;
+    filter: brightness(0.85);
 }
 
 input, select, textarea {
