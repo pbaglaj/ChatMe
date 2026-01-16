@@ -1,14 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "./Navbar.css";
 
 function Navbar() {
   const { isLoggedIn, user, logout } = useAuth();
 
   return (
-    <nav style={{ padding: '10px', background: '#eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div style={{ fontSize: 24, color: '#007bff' }}><strong>ChatMe</strong></div>
-      <div style={{ display: 'flex', gap: 12 }}>
+    <nav className="navbar">
+      <div className="navbar-brand">ChatMe</div>
+      <div className="navbar-links">
         {isLoggedIn ? (
           <>
             <Link onClick={logout} to="/login">Logout</Link>
