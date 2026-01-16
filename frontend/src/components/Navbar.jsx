@@ -8,7 +8,7 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">ChatMe</div>
+      <div className="navbar-brand"><Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>ChatMe</Link></div>
       <div className="navbar-links">
         {isLoggedIn ? (
           <>
