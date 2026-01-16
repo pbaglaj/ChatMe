@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
@@ -9,9 +9,12 @@ import Navbar from './components/Navbar';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
+  const location = useLocation();
+  const hideNavbar = location.pathname === '/';
+
   return (
     <AuthProvider>
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <div style={{ padding: '20px' }}>
         <Routes>
           <Route path="/register" element={<RegisterPage />} />
