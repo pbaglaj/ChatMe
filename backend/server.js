@@ -19,6 +19,13 @@ app.use(express.json());
 // In-memory store for messages (replace with DB)
 const messages = {}; // { roomName: [ { user, text, time } ] }
 
+// In-memory store for rooms
+let rooms = [
+    { id: 1, name: 'General', description: 'General chat room', createdAt: new Date().toISOString() },
+    { id: 2, name: 'Random', description: 'Random discussions', createdAt: new Date().toISOString() }
+];
+let roomIdCounter = 3;
+
 io.on('connection', (socket) => {
     console.log('New WebSocket connection:', socket.id);
 
@@ -103,6 +110,151 @@ const authMiddleware = require('./middleware/auth_middleware.js');
 
 app.post('/register', authController.register);
 app.post('/login', authController.login);
+
+app.post('/logout', authMiddleware, (req, res) => {
+    res.status(200).json({ message: 'Logged out successfully' });
+});
+
+// ROOMS CRUD OPERATIONS
+app.post('/rooms', authMiddleware, (req, res) => {
+    const { name, description } = req.body;
+    
+    if (!name) {
+        return res.status(400).json({ message: 'Room name is required' });
+    }
+    
+    const existingRoom = rooms.find(r => r.name.toLowerCase() === name.toLowerCase());
+    if (existingRoom) {
+        return res.status(409).json({ message: 'Room with this name already exists' });
+    }
+    
+    const newRoom = {
+        id: roomIdCounter++,
+        name,
+        description: description || '',
+        createdAt: new Date().toISOString(),
+        createdBy: req.user.id
+    };
+    
+    rooms.push(newRoom);
+    messages[name] = [];
+    
+    res.status(201).json({ message: 'Room created successfully', room: newRoom });
+});
+
+app.get('/rooms', (req, res) => {
+    res.json(rooms);
+});
+
+app.get('/rooms/:id', (req, res) => {
+    const roomId = parseInt(req.params.id);
+    const room = rooms.find(r => r.id === roomId);
+    
+    if (!room) {
+        return res.status(404).json({ message: 'Room not found' });
+    }
+    
+    res.json(room);
+});
+
+app.put('/rooms/:id', authMiddleware, (req, res) => {
+    const roomId = parseInt(req.params.id);
+    const { name, description } = req.body;
+    
+    const roomIndex = rooms.findIndex(r => r.id === roomId);
+    
+    if (roomIndex === -1) {
+        return res.status(404).json({ message: 'Room not found' });
+    }
+    
+    const oldName = rooms[roomIndex].name;
+    
+    if (name && name !== oldName) {
+        const existingRoom = rooms.find(r => r.name.toLowerCase() === name.toLowerCase() && r.id !== roomId);
+        if (existingRoom) {
+            return res.status(409).json({ message: 'Room with this name already exists' });
+        }
+        if (messages[oldName]) {
+            messages[name] = messages[oldName];
+            delete messages[oldName];
+        }
+    }
+    
+    rooms[roomIndex] = {
+        ...rooms[roomIndex],
+        name: name || rooms[roomIndex].name,
+        description: description !== undefined ? description : rooms[roomIndex].description,
+        updatedAt: new Date().toISOString()
+    };
+    
+    res.json({ message: 'Room updated successfully', room: rooms[roomIndex] });
+});
+
+app.delete('/rooms/:id', authMiddleware, (req, res) => {
+    const roomId = parseInt(req.params.id);
+    
+    const roomIndex = rooms.findIndex(r => r.id === roomId);
+    
+    if (roomIndex === -1) {
+        return res.status(404).json({ message: 'Room not found' });
+    }
+    
+    const roomName = rooms[roomIndex].name;
+    rooms.splice(roomIndex, 1);
+    
+    if (messages[roomName]) {
+        delete messages[roomName];
+    }
+    
+    res.json({ message: 'Room deleted successfully' });
+});
+
+// SEARCH
+app.get('/users/search', authMiddleware, async (req, res) => {
+    try {
+        const { q } = req.query;
+        
+        if (!q || q.trim() === '') {
+            return res.status(400).json({ message: 'Search query is required' });
+        }
+        
+        const searchPattern = `%${q}%`;
+        
+        const result = await db.query(
+            "SELECT id, user_id, username FROM users WHERE username ILIKE $1",
+            [searchPattern]
+        );
+        
+        res.json({ 
+            query: q,
+            count: result.rows.length,
+            users: result.rows 
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+app.get('/rooms/search', (req, res) => {
+    const { q } = req.query;
+    
+    if (!q || q.trim() === '') {
+        return res.status(400).json({ message: 'Search query is required' });
+    }
+    
+    const pattern = q.toLowerCase();
+    const foundRooms = rooms.filter(r => 
+        r.name.toLowerCase().includes(pattern) || 
+        r.description.toLowerCase().includes(pattern)
+    );
+    
+    res.json({ 
+        query: q,
+        count: foundRooms.length,
+        rooms: foundRooms 
+    });
+});
 
 app.get('/profile', authMiddleware, async (req, res) => {
     try {

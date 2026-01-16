@@ -1,0 +1,78 @@
+.search-users-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-users-login-prompt {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.search-users-description {
+    color: #666;
+}
+
+.search-users-form {
+    margin-bottom: 20px;
+}
+
+.search-users-form-row {
+    display: flex;
+    gap: 10px;
+}
+
+.search-users-input {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.search-users-submit-btn {
+    padding: 10px 20px;
+}
+
+.search-users-error {
+    color: red;
+    padding: 10px;
+    background: #ffebee;
+    border-radius: 4px;
+}
+
+.search-users-results {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.search-users-list {
+    list-style: none;
+    padding: 0;
+}
+
+.search-users-list-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-users-user-id {
+    color: #999;
+    margin-left: 10px;
+}
+
+.search-users-profile-link {
+    padding: 6px 12px;
+    background: #2196F3;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.search-users-profile-link:hover {
+    background: #1976D2;
+}

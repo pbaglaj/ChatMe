@@ -37,10 +37,15 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await api.post('/logout');
+        } catch (error) {
+            console.error("Logout request failed", error);
+        }
         sessionStorage.removeItem('token');
         setUser(null);
-        navigate('/login');
+        navigate('/');
     };
 
     if (loading) {

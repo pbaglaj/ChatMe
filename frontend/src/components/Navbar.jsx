@@ -8,13 +8,15 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand"><Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>ChatMe</Link></div>
+      <div className="navbar-brand">ChatMe</div>
       <div className="navbar-links">
         {isLoggedIn ? (
           <>
-            <Link onClick={logout} to="/login">Logout</Link>
+            <Link onClick={logout} to="/">Logout</Link>
             <Link to={`/profile/${user?.user_id}`}>Your Profile</Link>
+            <Link to="/rooms">Rooms</Link>
             <Link to="/chat">Chat</Link>
+            <Link to="/users/search">Search Users</Link>
           </>
         ) : (
           <>
