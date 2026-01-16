@@ -101,7 +101,7 @@ function ChatPage() {
 
     if (!isJoined) {
         return (
-            <>
+            <div className="join-room-container">
                 <div id="login-screen">
                     <h2>Join the chat</h2>
                     <input 
@@ -115,12 +115,12 @@ function ChatPage() {
                     <button id="join-btn" onClick={handleJoin}>Join Room</button>
                 </div>
                 <div id="chat-screen" className="chat-hidden"></div>
-            </>
+            </div>
         );
     }
 
     return (
-        <>
+        <div className="chat-container">
             <div id="login-screen" className="chat-hidden"></div>
             <div id="chat-screen">
                 <h2 id="room-name-display">Room: {room}</h2>
@@ -168,7 +168,7 @@ function ChatPage() {
                     <button type="submit">Send</button>
                 </form>
             </div>
-        </>
+        </div>
     );
 }
 
