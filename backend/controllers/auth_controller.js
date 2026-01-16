@@ -6,12 +6,12 @@ exports.register = async (req, res) => {
         const { username, password } = req.body;
 
         if (!username || !password) {
-            return res.status(400).json({ message: "Nazwa użytkownika i hasło są wymagane" });
+            return res.status(400).json({ message: "Username and password are required" });
         }
         
         const userExists = await db.query("SELECT * FROM users WHERE username = $1", [username]);
         if (userExists.rows.length > 0) {
-            return res.status(409).json({ message: "Użytkownik o tej nazwie już istnieje" });
+            return res.status(409).json({ message: "User with this username already exists" });
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -23,13 +23,13 @@ exports.register = async (req, res) => {
         );
 
         res.status(201).json({
-            message: "Użytkownik pomyślnie zarejestrowany",
+            message: "User successfully registered",
             user: newUser.rows[0]
         });
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Błąd serwera" });
+        res.status(500).json({ message: "Server error" });
     }
 };
 
@@ -41,18 +41,18 @@ exports.login = async (req, res) => {
         const { username, password } = req.body;
 
         if (!username || !password) {
-            return res.status(400).json({ message: "Nazwa użytkownika i hasło są wymagane" });
+            return res.status(400).json({ message: "Username and password are required" });
         }
 
         const userResult = await db.query("SELECT * FROM users WHERE username = $1", [username]);
         if (userResult.rows.length === 0) {
-            return res.status(401).json({ message: "Nieprawidłowe dane logowania" });
+            return res.status(401).json({ message: "Invalid login credentials" });
         }
         const user = userResult.rows[0];
 
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
-            return res.status(401).json({ message: "Nieprawidłowe dane logowania" });
+            return res.status(401).json({ message: "Invalid login credentials" });
         }
 
         const payload = {
@@ -72,6 +72,6 @@ exports.login = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Błąd serwera" });
+        res.status(500).json({ message: "Server error" });
     }
 };

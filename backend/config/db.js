@@ -7,9 +7,9 @@ const pool = new Pool({
 
 pool.connect((err, client, release) => {
   if (err) {
-    return console.error('Błąd podczas łączenia z bazą danych', err.stack);
+    return console.error('Error while connecting to database', err.stack);
   }
-  console.log('Pomyślnie połączono z bazą danych PostgreSQL.');
+  console.log('Successfully connected to PostgreSQL database.');
   client.release();
 });
 
