@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import '../pages/MainPage.css';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -26,33 +27,36 @@ function LoginPage() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', flex: 1, justifyContent: 'space-between', alignItems: 'center', height: '80vh', padding: '0 20px' }}>
+    <div className='main-page-container'>
       <div>
-        <h2>Welcome to ChatMe</h2>
-        <p>Please log in to continue.</p>
+        <h2 style={{ fontSize: 48 }}>Welcome to <span style={{ fontSize: 64, color: '#007bff' }}>ChatMe</span></h2>
+        <p style={{ fontSize: 24 }}>Connect with friends and the world around you.</p>
+        <p style={{ fontSize: 12, color: 'gray' }}>Please log in to continue.</p>
       </div>
-      <div>
-        <h2>Logowanie</h2>
+      <div className='form-container'>
         <form onSubmit={handleSubmit}>
           <div>
-            <label>Username:</label>
+            <label htmlFor="username" className='visually-hidden'>Username:</label>
             <input 
               type="text" 
               value={username} 
-              onChange={(e) => setUsername(e.target.value)} 
+              placeholder='Username'
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           <div>
-            <label>Password:</label>
+            <label htmlFor="password" className='visually-hidden'>Password:</label>
             <input 
               type="password" 
-              value={password} 
+              value={password}
+              placeholder='Password' 
               onChange={(e) => setPassword(e.target.value)} 
             />
           </div>
-          <button type="submit">Login</button>
+        <button type="submit" className="main-page-button">Log In</button>
         </form>
         {message && <p>{message}</p>}
+        <p><small>Don't have an account? <a href="/register">Register here</a></small></p>
       </div>
     </div>
   );
