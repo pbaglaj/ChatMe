@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import ProfileHeader from '../components/ProfileHeader';
 import './ProfilePage.css';
 
 function ProfilePage() {
@@ -13,14 +14,14 @@ function ProfilePage() {
   
   // Mock data
   const [friends] = useState([
-    { id: 1, user_id: 'usr_001', username: 'Alice' },
-    { id: 2, user_id: 'usr_002', username: 'Bob' },
-    { id: 3, user_id: 'usr_003', username: 'Charlie' },
+    // { id: 1, user_id: 'usr_001', username: 'Alice' },
+    // { id: 2, user_id: 'usr_002', username: 'Bob' },
+    // { id: 3, user_id: 'usr_003', username: 'Charlie' },
   ]);
 
   const [posts] = useState([
-    { id: 1, content: 'Just joined ChatMe!', time: new Date(Date.now() - 3600000).toISOString() },
-    { id: 2, content: 'Great conversations in the chat rooms today!', time: new Date(Date.now() - 86400000).toISOString() },
+    // { id: 1, content: 'Just joined ChatMe!', time: new Date(Date.now() - 3600000).toISOString() },
+    // { id: 2, content: 'Great conversations in the chat rooms today!', time: new Date(Date.now() - 86400000).toISOString() },
   ]);
 
   useEffect(() => {
@@ -61,30 +62,14 @@ function ProfilePage() {
 
   return (
     <div className="profile-container">
-      <div className="profile-header">
-        <div className="profile-avatar">{getInitial(profileData.user.username)}</div>
-        <h1 className="profile-username">{profileData.user.username}</h1>
-        <p className="profile-id">@{profileData.user.user_id}</p>
-        
-        <div className="profile-stats">
-          <div className="profile-stat">
-            <div className="profile-stat-value">{friends.length}</div>
-            <div className="profile-stat-label">Friends</div>
-          </div>
-          <div className="profile-stat">
-            <div className="profile-stat-value">{posts.length}</div>
-            <div className="profile-stat-label">Posts</div>
-          </div>
-        </div>
-
-        <div className="profile-actions">
-          {isOwnProfile ? (
-            <button>Edit Profile</button>
-          ) : (
-            <button>Add Friend</button>
-          )}
-        </div>
-      </div>
+      <ProfileHeader 
+        username={profileData.user.username} 
+        username_id={profileData.user.user_id}
+        bio={profileData.user.bio}
+        friends={friends}
+        posts={posts}
+        isOwnProfile={isOwnProfile}
+      />
 
       <div className="profile-card">
         <h3 className="profile-card-title">Friends</h3>
