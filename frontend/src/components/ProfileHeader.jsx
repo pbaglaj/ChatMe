@@ -1,15 +1,34 @@
 import React from 'react';
+import { useState } from 'react';
 import './ProfileHeader.css';
 
 function ProfileHeader({ username, username_id, bio='Nice to see you!', friends = [], posts = [], isOwnProfile }) {
+  const [editing, setEditing] = useState(false);
+  const [bioText, setBioText] = useState(bio);
+  const [friendMessage, setFriendMessage] = useState('');
+
   const getInitial = (name) => name ? name.charAt(0).toUpperCase() : '?';
+  const handleAddFriend = () => {
+    setFriendMessage('Friend request sent!');
+  }
 
   return (
     <div className="profile-header">
         <div className="profile-avatar">{getInitial(username)}</div>
         <h1 className="profile-username">{username}</h1>
         <p className="profile-id">@{username_id}</p>
-        <p className='profile-bio'>{bio}</p>
+        <p className='profile-bio'>{editing ? (
+          <input 
+            type="text" 
+            value={bioText}
+            onChange={(e) => setBioText(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && setEditing(false)}
+            onBlur={() => setEditing(false)}
+            autoFocus
+          />
+        ) : (
+          <p>{bioText}</p>
+        )}</p>
         
         <div className="profile-stats">
           <div className="profile-stat">
@@ -24,9 +43,12 @@ function ProfileHeader({ username, username_id, bio='Nice to see you!', friends 
 
         <div className="profile-actions">
           {isOwnProfile ? (
-            <button>Edit Profile</button>
+            <button onClick={() => isOwnProfile && setEditing(true)}>Edit Profile</button>
           ) : (
-            <button>Add Friend</button>
+            <div>
+              <button onClick={handleAddFriend}>Add Friend</button>
+              <p className='profile-friend-message'>{friendMessage}</p>
+            </div>
           )}
         </div>
       </div>
