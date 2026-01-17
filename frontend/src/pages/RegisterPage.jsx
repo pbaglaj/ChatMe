@@ -23,7 +23,7 @@ function RegisterPage() {
   };
 
   return (
-    <div>
+    <div className='container'>
       <h2>Registration</h2>
       <form onSubmit={handleSubmit}>
         <div>
