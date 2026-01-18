@@ -16,7 +16,7 @@ function Navbar() {
             <Link to="/rooms">Rooms</Link>
             <Link to="/chat">Chat</Link>
             <Link to="/users/search">Search Users</Link>
-            <Link to="/" onClick={logout}>Logout</Link>
+            <Link to="/" onClick={logout} className="logout">Logout</Link>
           </>
         ) : (
           <>

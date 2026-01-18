@@ -16,3 +16,9 @@
   display: flex;
   gap: 12px;
 }
+
+.logout {
+  color: #ff4d4f;
+  cursor: pointer;
+  text-decoration: none;
+}
