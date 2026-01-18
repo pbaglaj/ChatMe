@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import ProfileHeader from '../components/ProfileHeader';
+import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import ProfileHeader from '../../components/ProfileHeader/ProfileHeader';
 import './ProfilePage.css';
 
 function ProfilePage() {

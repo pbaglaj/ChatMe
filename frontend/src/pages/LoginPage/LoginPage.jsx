@@ -1,30 +1,33 @@
 import React, { useState } from 'react';
-import api from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
-function RegisterPage() {
+function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     try {
-      const response = await api.post('/register', { username, password });
-      setMessage(response.data.message);
+      const response = await api.post('/login', { username, password });
+      
+      setMessage('Login successful! Redirecting...');
+      
       setTimeout(() => {
-        navigate('/login');
-      }, 1000);
+        login(response.data.token);
+      }, 1000); 
+
     } catch (error) {
-      setMessage(error.response?.data?.message || 'An error occurred during registration.');
+      setMessage(error.response?.data?.message || 'An error occurred during login.');
     }
   };
 
   return (
     <div className='container'>
-      <h2>Registration</h2>
+      <h2>Log In</h2>
       <form onSubmit={handleSubmit}>
         <div>
           <label>Username:</label>
@@ -42,11 +45,11 @@ function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)} 
           />
         </div>
-        <button type="submit">Register</button>
+        <button type="submit">Login</button>
       </form>
       {message && <p>{message}</p>}
     </div>
   );
 }
 
-export default RegisterPage;
+export default LoginPage;

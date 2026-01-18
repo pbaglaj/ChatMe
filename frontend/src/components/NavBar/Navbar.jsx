@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import "./Navbar.css";
 
 function Navbar() {
@@ -12,11 +12,11 @@ function Navbar() {
       <div className="navbar-links">
         {isLoggedIn ? (
           <>
-            <Link onClick={logout} to="/">Logout</Link>
             <Link to={`/profile/${user?.user_id}`}>Your Profile</Link>
             <Link to="/rooms">Rooms</Link>
             <Link to="/chat">Chat</Link>
             <Link to="/users/search">Search Users</Link>
+            <Link to="/" onClick={logout}>Logout</Link>
           </>
         ) : (
           <>

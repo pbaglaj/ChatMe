@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import '../pages/MainPage.css';
-
+import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import './MainPage.css';
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

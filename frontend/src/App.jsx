@@ -1,13 +1,13 @@
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import LoginPage from './pages/LoginPage'; 
-import RegisterPage from './pages/RegisterPage';
-import ProfilePage from './pages/ProfilePage';
-import ChatPage from './pages/ChatPage';
-import MainPage from './pages/MainPage';
-import RoomsPage from './pages/RoomsPage';
-import SearchUsersPage from './pages/SearchUsersPage';
-import Navbar from './components/Navbar';
+import LoginPage from './pages/LoginPage/LoginPage'; 
+import RegisterPage from './pages/RegisterPage/RegisterPage';
+import ProfilePage from './pages/ProfilePage/ProfilePage';
+import ChatPage from './pages/ChatPage/ChatPage';
+import MainPage from './pages/MainPage/MainPage';
+import RoomsPage from './pages/RoomsPage/RoomsPage';
+import SearchUsersPage from './pages/SearchUsersPage/SearchUsersPage';
+import Navbar from './components/NavBar/Navbar';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
