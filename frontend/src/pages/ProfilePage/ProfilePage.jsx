@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import ProfileHeader from '../../components/ProfileHeader/ProfileHeader';
+import FriendsPanel from '../../components/FriendsPanel/FriendsPanel';
+import PostsPanel from '../../components/PostsPanel/PostsPanel';
 import './ProfilePage.css';
 
 function ProfilePage() {
@@ -69,36 +71,8 @@ function ProfilePage() {
         posts={posts}
         isOwnProfile={isOwnProfile}
       />
-
-      <div className="profile-card">
-        <h3 className="profile-card-title">Friends</h3>
-        {friends.length === 0 ? (
-          <p className="no-content">No friends yet</p>
-        ) : (
-          <div className="friends-list">
-            {friends.map(friend => (
-              <div key={friend.id} className="friend-chip" onClick={() => navigate(`/profile/${friend.user_id}`)}>
-                <div className="friend-avatar-small">{getInitial(friend.username)}</div>
-                <span className="friend-name">{friend.username}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="profile-card">
-        <h3 className="profile-card-title">Posts</h3>
-        {posts.length === 0 ? (
-          <p className="no-content">No posts yet</p>
-        ) : (
-          posts.map(post => (
-            <div key={post.id} className="post-item">
-              <p className="post-content">{post.content}</p>
-              <span className="post-time">{formatTime(post.time)}</span>
-            </div>
-          ))
-        )}
-      </div>
+      <FriendsPanel friends={friends} formatTime={formatTime}></FriendsPanel>
+      <PostsPanel posts={posts} formatTime={formatTime}></PostsPanel>
     </div>
   );
 }
