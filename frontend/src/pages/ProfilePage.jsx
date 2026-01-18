@@ -65,7 +65,6 @@ function ProfilePage() {
       <ProfileHeader 
         username={profileData.user.username} 
         username_id={profileData.user.user_id}
-        bio={profileData.user.bio}
         friends={friends}
         posts={posts}
         isOwnProfile={isOwnProfile}

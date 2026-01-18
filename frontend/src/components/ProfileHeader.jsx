@@ -1,11 +1,22 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './ProfileHeader.css';
 
-function ProfileHeader({ username, username_id, bio='Nice to see you!', friends = [], posts = [], isOwnProfile }) {
+function ProfileHeader({ username, username_id, friends = [], posts = [], isOwnProfile }) {
   const [editing, setEditing] = useState(false);
-  const [bioText, setBioText] = useState(bio);
+  const [bioText, setBioText] = useState('');
   const [friendMessage, setFriendMessage] = useState('');
+
+  // for now store in localStorage (db in future)
+  useEffect(() => {
+    const savedBio = localStorage.getItem('bio_' + username_id) || 'This user has no bio yet.';
+    setBioText(savedBio);
+  }, [username_id]);
+
+  const handleBio = () => {
+    localStorage.setItem('bio_' + username_id, bioText);
+    setEditing(false);
+  }
 
   const getInitial = (name) => name ? name.charAt(0).toUpperCase() : '?';
   const handleAddFriend = () => {
@@ -17,18 +28,18 @@ function ProfileHeader({ username, username_id, bio='Nice to see you!', friends 
         <div className="profile-avatar">{getInitial(username)}</div>
         <h1 className="profile-username">{username}</h1>
         <p className="profile-id">@{username_id}</p>
-        <p className='profile-bio'>{editing ? (
+        <div className='profile-bio'>{editing ? (
           <input 
             type="text" 
             value={bioText}
             onChange={(e) => setBioText(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && setEditing(false)}
-            onBlur={() => setEditing(false)}
+            onKeyDown={(e) => e.key === 'Enter' && handleBio()}
+            onBlur={handleBio}
             autoFocus
           />
         ) : (
           <p>{bioText}</p>
-        )}</p>
+        )}</div>
         
         <div className="profile-stats">
           <div className="profile-stat">
