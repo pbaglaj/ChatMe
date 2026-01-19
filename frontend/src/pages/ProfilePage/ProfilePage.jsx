@@ -13,13 +13,8 @@ function ProfilePage() {
   const { user: currentUser } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState('');
-  
-  // Mock data
-  const [friends] = useState([
-    // { id: 1, user_id: 'usr_001', username: 'Alice' },
-    // { id: 2, user_id: 'usr_002', username: 'Bob' },
-    // { id: 3, user_id: 'usr_003', username: 'Charlie' },
-  ]);
+  const [friendsCount, setFriendsCount] = useState(0);
+  const [refreshFriends, setRefreshFriends] = useState(0);
 
   const [posts] = useState([
     // { id: 1, content: 'Just joined ChatMe!', time: new Date(Date.now() - 3600000).toISOString() },
@@ -44,6 +39,20 @@ function ProfilePage() {
   }, [user_id]);
 
   useEffect(() => {
+    const fetchFriendsCount = async () => {
+      if (!profileData) return;
+      try {
+        const endpoint = `/friends/${profileData.user.user_id}`;
+        const response = await api.get(endpoint);
+        setFriendsCount(response.data.count);
+      } catch (err) {
+        console.error('Failed to fetch friends count:', err);
+      }
+    };
+    fetchFriendsCount();
+  }, [refreshFriends, profileData]);
+
+  useEffect(() => {
     if (profileData && (user_id === 'undefined' || !user_id)) {
       navigate(`/profile/${profileData.user.user_id}`, { replace: true });
     }
@@ -59,6 +68,10 @@ function ProfilePage() {
     return `${Math.floor(diffMs / 86400000)}d ago`;
   };
 
+  const handleFriendAdded = () => {
+    setRefreshFriends(prev => prev + 1);
+  };
+
   if (error) return <p className="profile-error">{error}</p>;
   if (!profileData) return <p className="profile-loading">Loading...</p>;
 
@@ -67,11 +80,13 @@ function ProfilePage() {
       <ProfileHeader 
         username={profileData.user.username} 
         username_id={profileData.user.user_id}
-        friends={friends}
+        friendsCount={friendsCount}
         posts={posts}
         isOwnProfile={isOwnProfile}
+        getInitial={getInitial}
+        onFriendAdded={handleFriendAdded}
       />
-      <FriendsPanel friends={friends} formatTime={formatTime}></FriendsPanel>
+      <FriendsPanel getInitial={getInitial} refreshTrigger={refreshFriends} userId={profileData.user.user_id}></FriendsPanel>
       <PostsPanel posts={posts} formatTime={formatTime}></PostsPanel>
     </div>
   );

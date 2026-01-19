@@ -315,6 +315,166 @@ app.get('/profile/:user_id', authMiddleware, async (req, res) => {
     }
 });
 
+// FRIENDS ENDPOINTS
+app.post('/friends/:friend_user_id', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const friendUserId = req.params.friend_user_id;
+
+        const friendResult = await db.query(
+            "SELECT id FROM users WHERE user_id = $1",
+            [friendUserId]
+        );
+
+        if (friendResult.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const friendId = friendResult.rows[0].id;
+
+        if (userId === friendId) {
+            return res.status(400).json({ message: "Cannot add yourself as a friend" });
+        }
+
+        const existingFriend = await db.query(
+            "SELECT id FROM friends WHERE user_id = $1 AND friend_id = $2",
+            [userId, friendId]
+        );
+
+        if (existingFriend.rows.length > 0) {
+            return res.status(409).json({ message: "Already friends" });
+        }
+
+        await db.query(
+            "INSERT INTO friends (user_id, friend_id) VALUES ($1, $2), ($2, $1)",
+            [userId, friendId]
+        );
+
+        res.status(201).json({ message: "Friend added successfully" });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.get('/friends', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const result = await db.query(
+            `SELECT u.id, u.user_id, u.username 
+             FROM friends f 
+             JOIN users u ON f.friend_id = u.id 
+             WHERE f.user_id = $1`,
+            [userId]
+        );
+
+        res.status(200).json({
+            count: result.rows.length,
+            friends: result.rows
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.get('/friends/status/:user_id', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const targetUserId = req.params.user_id;
+
+        const userResult = await db.query(
+            "SELECT id FROM users WHERE user_id = $1",
+            [targetUserId]
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const targetId = userResult.rows[0].id;
+
+        const friendCheck = await db.query(
+            "SELECT id FROM friends WHERE user_id = $1 AND friend_id = $2",
+            [userId, targetId]
+        );
+
+        res.status(200).json({
+            isFriend: friendCheck.rows.length > 0
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.get('/friends/:user_id', authMiddleware, async (req, res) => {
+    try {
+        const targetUserId = req.params.user_id;
+
+        const userResult = await db.query(
+            "SELECT id FROM users WHERE user_id = $1",
+            [targetUserId]
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const userId = userResult.rows[0].id;
+
+        const result = await db.query(
+            `SELECT u.id, u.user_id, u.username 
+             FROM friends f 
+             JOIN users u ON f.friend_id = u.id 
+             WHERE f.user_id = $1`,
+            [userId]
+        );
+
+        res.status(200).json({
+            count: result.rows.length,
+            friends: result.rows
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.delete('/friends/:friend_user_id', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const friendUserId = req.params.friend_user_id;
+
+        const friendResult = await db.query(
+            "SELECT id FROM users WHERE user_id = $1",
+            [friendUserId]
+        );
+
+        if (friendResult.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const friendId = friendResult.rows[0].id;
+
+        await db.query(
+            "DELETE FROM friends WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)",
+            [userId, friendId]
+        );
+
+        res.status(200).json({ message: "Friend removed successfully" });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT} (with WebSocket support)`);

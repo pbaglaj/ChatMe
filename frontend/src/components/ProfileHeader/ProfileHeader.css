@@ -67,6 +67,16 @@
     gap: 10px;
 }
 
+.profile-actions .remove-friend-btn {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.profile-actions .remove-friend-btn:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
 .profile-friend-message {
     margin-top: 1rem;
     font-size: 0.8rem;
