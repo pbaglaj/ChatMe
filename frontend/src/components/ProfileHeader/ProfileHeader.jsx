@@ -3,18 +3,16 @@ import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import './ProfileHeader.css';
 
-function ProfileHeader({ username, username_id, friendsCount = 0, posts = [], isOwnProfile, getInitial, onFriendAdded }) {
+function ProfileHeader({ username, username_id, bio, friendsCount = 0, posts = [], isOwnProfile, getInitial, onFriendAdded, onBioUpdated }) {
   const [editing, setEditing] = useState(false);
-  const [bioText, setBioText] = useState('');
+  const [bioText, setBioText] = useState(bio || '');
   const [friendMessage, setFriendMessage] = useState('');
   const [isFriend, setIsFriend] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // for now store in localStorage (db in future)
   useEffect(() => {
-    const savedBio = localStorage.getItem('bio_' + username_id) || 'This user has no bio yet.';
-    setBioText(savedBio);
-  }, [username_id]);
+    setBioText(bio || '');
+  }, [bio]);
 
   useEffect(() => {
     const checkFriendshipStatus = async () => {
@@ -29,8 +27,14 @@ function ProfileHeader({ username, username_id, friendsCount = 0, posts = [], is
     checkFriendshipStatus();
   }, [username_id, isOwnProfile]);
 
-  const handleBio = () => {
-    localStorage.setItem('bio_' + username_id, bioText);
+  const handleBio = async () => {
+    if (!isOwnProfile) return;
+    try {
+      await api.put('/profile', { bio: bioText });
+      if (onBioUpdated) onBioUpdated(bioText);
+    } catch (error) {
+      console.error('Failed to update bio:', error);
+    }
     setEditing(false);
   }
 
@@ -82,9 +86,12 @@ function ProfileHeader({ username, username_id, friendsCount = 0, posts = [], is
             onKeyDown={(e) => e.key === 'Enter' && handleBio()}
             onBlur={handleBio}
             autoFocus
+            placeholder="Write something about yourself..."
           />
         ) : (
-          <p>{bioText}</p>
+          <p onClick={() => isOwnProfile && setEditing(true)} style={{ cursor: isOwnProfile ? 'pointer' : 'default' }}>
+            {bioText || (isOwnProfile ? 'Click to add bio...' : 'This user has no bio yet.')}
+          </p>
         )}</div>
         
         <div className="profile-stats">

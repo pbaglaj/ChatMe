@@ -72,6 +72,13 @@ function ProfilePage() {
     setRefreshFriends(prev => prev + 1);
   };
 
+  const handleBioUpdated = (newBio) => {
+    setProfileData(prev => ({
+      ...prev,
+      user: { ...prev.user, bio: newBio }
+    }));
+  };
+
   if (error) return <p className="profile-error">{error}</p>;
   if (!profileData) return <p className="profile-loading">Loading...</p>;
 
@@ -80,11 +87,13 @@ function ProfilePage() {
       <ProfileHeader 
         username={profileData.user.username} 
         username_id={profileData.user.user_id}
+        bio={profileData.user.bio}
         friendsCount={friendsCount}
         posts={posts}
         isOwnProfile={isOwnProfile}
         getInitial={getInitial}
         onFriendAdded={handleFriendAdded}
+        onBioUpdated={handleBioUpdated}
       />
       <FriendsPanel getInitial={getInitial} refreshTrigger={refreshFriends} userId={profileData.user.user_id}></FriendsPanel>
       <PostsPanel posts={posts} formatTime={formatTime}></PostsPanel>

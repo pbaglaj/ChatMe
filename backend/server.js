@@ -261,7 +261,7 @@ app.get('/profile', authMiddleware, async (req, res) => {
         const userId = req.user.id; 
 
         const userResult = await db.query(
-            "SELECT id, user_id, username FROM users WHERE id = $1", 
+            "SELECT id, user_id, username, bio FROM users WHERE id = $1", 
             [userId]
         );
 
@@ -276,7 +276,40 @@ app.get('/profile', authMiddleware, async (req, res) => {
             user: {
                 id: user.id,
                 user_id: user.user_id,
-                username: user.username
+                username: user.username,
+                bio: user.bio || ''
+            }
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.put('/profile', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { bio } = req.body;
+
+        const userResult = await db.query(
+            "UPDATE users SET bio = $1 WHERE id = $2 RETURNING id, user_id, username, bio",
+            [bio, userId]
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const user = userResult.rows[0];
+
+        res.status(200).json({
+            message: "Profile updated successfully",
+            user: {
+                id: user.id,
+                user_id: user.user_id,
+                username: user.username,
+                bio: user.bio || ''
             }
         });
 
@@ -291,7 +324,7 @@ app.get('/profile/:user_id', authMiddleware, async (req, res) => {
         const userId = req.params.user_id; 
         
         const userResult = await db.query(
-            "SELECT id, user_id, username FROM users WHERE user_id = $1", 
+            "SELECT id, user_id, username, bio FROM users WHERE user_id = $1", 
             [userId]
         );
 
@@ -305,7 +338,8 @@ app.get('/profile/:user_id', authMiddleware, async (req, res) => {
             user: {
                 id: user.id,
                 user_id: user.user_id,
-                username: user.username
+                username: user.username,
+                bio: user.bio || ''
             }
         });
 
