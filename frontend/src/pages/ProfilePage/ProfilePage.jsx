@@ -15,11 +15,7 @@ function ProfilePage() {
   const [error, setError] = useState('');
   const [friendsCount, setFriendsCount] = useState(0);
   const [refreshFriends, setRefreshFriends] = useState(0);
-
-  const [posts] = useState([
-    // { id: 1, content: 'Just joined ChatMe!', time: new Date(Date.now() - 3600000).toISOString() },
-    // { id: 2, content: 'Great conversations in the chat rooms today!', time: new Date(Date.now() - 86400000).toISOString() },
-  ]);
+  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -37,6 +33,20 @@ function ProfilePage() {
     };
     fetchProfile();
   }, [user_id]);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      if (!profileData) return;
+      try {
+        const endpoint = `/posts/${profileData.user.user_id}`;
+        const response = await api.get(endpoint);
+        setPosts(response.data.posts);
+      } catch (err) {
+        console.error('Failed to fetch posts:', err);
+      }
+    };
+    fetchPosts();
+  }, [profileData]);
 
   useEffect(() => {
     const fetchFriendsCount = async () => {
@@ -79,6 +89,14 @@ function ProfilePage() {
     }));
   };
 
+  const handlePostCreated = (newPost) => {
+    setPosts(prev => [newPost, ...prev]);
+  };
+
+  const handlePostDeleted = (postId) => {
+    setPosts(prev => prev.filter(post => post.id !== postId));
+  };
+
   if (error) return <p className="profile-error">{error}</p>;
   if (!profileData) return <p className="profile-loading">Loading...</p>;
 
@@ -96,7 +114,13 @@ function ProfilePage() {
         onBioUpdated={handleBioUpdated}
       />
       <FriendsPanel getInitial={getInitial} refreshTrigger={refreshFriends} userId={profileData.user.user_id}></FriendsPanel>
-      <PostsPanel posts={posts} formatTime={formatTime}></PostsPanel>
+      <PostsPanel 
+        posts={posts} 
+        formatTime={formatTime} 
+        isOwnProfile={isOwnProfile}
+        onPostCreated={handlePostCreated}
+        onPostDeleted={handlePostDeleted}
+      />
     </div>
   );
 }

@@ -108,14 +108,41 @@ const db = require('./config/db.js');
 const authController = require('./controllers/auth_controller.js');
 const authMiddleware = require('./middleware/auth_middleware.js');
 
+// AUTHENTICATION ENDPOINTS
 app.post('/register', authController.register);
 app.post('/login', authController.login);
-
 app.post('/logout', authMiddleware, (req, res) => {
     res.status(200).json({ message: 'Logged out successfully' });
 });
 
-// ROOMS CRUD OPERATIONS
+// USER SEARCH ENDPOINT
+app.get('/users/search', authMiddleware, async (req, res) => {
+    try {
+        const { q } = req.query;
+        
+        if (!q || q.trim() === '') {
+            return res.status(400).json({ message: 'Search query is required' });
+        }
+        
+        const searchPattern = `%${q}%`;
+        
+        const result = await db.query(
+            "SELECT id, user_id, username FROM users WHERE username ILIKE $1",
+            [searchPattern]
+        );
+        
+        res.json({ 
+            query: q,
+            count: result.rows.length,
+            users: result.rows 
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ROOMS ENDPOINTS
 app.post('/rooms', authMiddleware, (req, res) => {
     const { name, description } = req.body;
     
@@ -229,33 +256,7 @@ app.delete('/rooms/:id', authMiddleware, (req, res) => {
     res.json({ message: 'Room deleted successfully' });
 });
 
-// SEARCH
-app.get('/users/search', authMiddleware, async (req, res) => {
-    try {
-        const { q } = req.query;
-        
-        if (!q || q.trim() === '') {
-            return res.status(400).json({ message: 'Search query is required' });
-        }
-        
-        const searchPattern = `%${q}%`;
-        
-        const result = await db.query(
-            "SELECT id, user_id, username FROM users WHERE username ILIKE $1",
-            [searchPattern]
-        );
-        
-        res.json({ 
-            query: q,
-            count: result.rows.length,
-            users: result.rows 
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
+// PROFILE ENDPOINTS
 app.get('/profile', authMiddleware, async (req, res) => {
     try {
         const userId = req.user.id; 
@@ -342,6 +343,150 @@ app.get('/profile/:user_id', authMiddleware, async (req, res) => {
                 bio: user.bio || ''
             }
         });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// POSTS ENDPOINTS
+app.post('/posts', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { content } = req.body;
+
+        if (!content || content.trim() === '') {
+            return res.status(400).json({ message: "Post content is required" });
+        }
+
+        const result = await db.query(
+            "INSERT INTO posts (user_id, content) VALUES ($1, $2) RETURNING id, user_id, content, created_at",
+            [userId, content.trim()]
+        );
+
+        res.status(201).json({
+            message: "Post created successfully",
+            post: result.rows[0]
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.get('/posts', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const result = await db.query(
+            `SELECT p.id, p.content, p.created_at, u.username, u.user_id as author_user_id
+             FROM posts p
+             JOIN users u ON p.user_id = u.id
+             WHERE p.user_id = $1
+             ORDER BY p.created_at DESC`,
+            [userId]
+        );
+
+        res.status(200).json({
+            count: result.rows.length,
+            posts: result.rows
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.get('/posts/:user_id', authMiddleware, async (req, res) => {
+    try {
+        const targetUserId = req.params.user_id;
+
+        const userResult = await db.query(
+            "SELECT id FROM users WHERE user_id = $1",
+            [targetUserId]
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const userId = userResult.rows[0].id;
+
+        const result = await db.query(
+            `SELECT p.id, p.content, p.created_at, u.username, u.user_id as author_user_id
+             FROM posts p
+             JOIN users u ON p.user_id = u.id
+             WHERE p.user_id = $1
+             ORDER BY p.created_at DESC`,
+            [userId]
+        );
+
+        res.status(200).json({
+            count: result.rows.length,
+            posts: result.rows
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.put('/posts/:post_id', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const postId = req.params.post_id;
+        const { content } = req.body;
+
+        if (!content || content.trim() === '') {
+            return res.status(400).json({ message: "Post content is required" });
+        }
+
+        const postCheck = await db.query(
+            "SELECT id FROM posts WHERE id = $1 AND user_id = $2",
+            [postId, userId]
+        );
+
+        if (postCheck.rows.length === 0) {
+            return res.status(404).json({ message: "Post not found or you don't have permission to edit it" });
+        }
+
+        const result = await db.query(
+            "UPDATE posts SET content = $1 WHERE id = $2 RETURNING id, user_id, content, created_at",
+            [content.trim(), postId]
+        );
+
+        res.status(200).json({
+            message: "Post updated successfully",
+            post: result.rows[0]
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.delete('/posts/:post_id', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const postId = req.params.post_id;
+
+        const postCheck = await db.query(
+            "SELECT id FROM posts WHERE id = $1 AND user_id = $2",
+            [postId, userId]
+        );
+
+        if (postCheck.rows.length === 0) {
+            return res.status(404).json({ message: "Post not found or you don't have permission to delete it" });
+        }
+
+        await db.query("DELETE FROM posts WHERE id = $1", [postId]);
+
+        res.status(200).json({ message: "Post deleted successfully" });
 
     } catch (err) {
         console.error(err);
