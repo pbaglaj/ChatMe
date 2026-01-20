@@ -26,6 +26,21 @@ let rooms = [
 ];
 let roomIdCounter = 3;
 
+const sseClients = new Map();
+
+function sendNotificationToUser(userId, notification) {
+    const client = sseClients.get(userId);
+    if (client) {
+        client.write(`data: ${JSON.stringify(notification)}\n\n`);
+    }
+}
+
+function sendNotificationToUsers(userIds, notification) {
+    userIds.forEach(userId => {
+        sendNotificationToUser(userId, notification);
+    });
+}
+
 io.on('connection', (socket) => {
     socket.on('joinRoom', (room) => {
         socket.join(room);
@@ -371,6 +386,28 @@ app.post('/posts', authMiddleware, async (req, res) => {
             [userId, content.trim()]
         );
 
+        const userResult = await db.query(
+            "SELECT username FROM users WHERE id = $1",
+            [userId]
+        );
+        const username = userResult.rows[0]?.username || 'Someone';
+
+        const friendsResult = await db.query(
+            "SELECT friend_id FROM friends WHERE user_id = $1",
+            [userId]
+        );
+
+        friendsResult.rows.forEach(friend => {
+            sendNotificationToUser(friend.friend_id, {
+                type: 'new_post',
+                message: `${username} published a new post!`,
+                from: username,
+                postId: result.rows[0].id,
+                preview: content.trim().substring(0, 50) + (content.length > 50 ? '...' : ''),
+                time: new Date().toISOString()
+            });
+        });
+
         res.status(201).json({
             message: "Post created successfully",
             post: result.rows[0]
@@ -507,7 +544,7 @@ app.post('/friends/:friend_user_id', authMiddleware, async (req, res) => {
         const friendUserId = req.params.friend_user_id;
 
         const friendResult = await db.query(
-            "SELECT id FROM users WHERE user_id = $1",
+            "SELECT id, username FROM users WHERE user_id = $1",
             [friendUserId]
         );
 
@@ -534,6 +571,19 @@ app.post('/friends/:friend_user_id', authMiddleware, async (req, res) => {
             "INSERT INTO friends (user_id, friend_id) VALUES ($1, $2), ($2, $1)",
             [userId, friendId]
         );
+
+        const currentUserResult = await db.query(
+            "SELECT username FROM users WHERE id = $1",
+            [userId]
+        );
+        const currentUsername = currentUserResult.rows[0]?.username || 'Someone';
+
+        sendNotificationToUser(friendId, {
+            type: 'friend_added',
+            message: `${currentUsername} added you as a friend!`,
+            from: currentUsername,
+            time: new Date().toISOString()
+        });
 
         res.status(201).json({ message: "Friend added successfully" });
 
@@ -656,6 +706,51 @@ app.delete('/friends/:friend_user_id', authMiddleware, async (req, res) => {
 
     } catch (err) {
         console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// NOTIFICATIONS ENDPOINTS (SSE)
+app.get('/notifications/stream', async (req, res) => {
+    try {
+        const token = req.query.token || req.header('Authorization')?.split(' ')[1];
+        
+        if (!token) {
+            return res.status(401).json({ message: "No token, authorization denied" });
+        }
+
+        const jwt = require('jsonwebtoken');
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(401).json({ message: "Invalid token" });
+        }
+
+        const userId = decoded.user.id;
+
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.flushHeaders();
+
+        res.write(`data: ${JSON.stringify({ type: 'connected', message: 'Connected to notifications' })}\n\n`);
+
+        sseClients.set(userId, res);
+        console.log(`SSE client connected: user ${userId}`);
+
+        const heartbeatInterval = setInterval(() => {
+            res.write(`data: ${JSON.stringify({ type: 'heartbeat', time: new Date().toISOString() })}\n\n`);
+        }, 30000);
+
+        req.on('close', () => {
+            clearInterval(heartbeatInterval);
+            sseClients.delete(userId);
+            console.log(`SSE client disconnected: user ${userId}`);
+        });
+    } catch (err) {
+        console.error('SSE error:', err);
         res.status(500).json({ message: "Server error" });
     }
 });

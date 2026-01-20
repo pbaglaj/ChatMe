@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import Notifications from "../Notifications/Notifications";
 import "./Navbar.css";
 
 function Navbar() {
@@ -16,6 +17,7 @@ function Navbar() {
             <Link to="/rooms">Rooms</Link>
             <Link to="/chat">Chat</Link>
             <Link to="/users/search">Search Users</Link>
+            <Notifications />
             <Link to="/" onClick={logout} className="logout">Logout</Link>
           </>
         ) : (
