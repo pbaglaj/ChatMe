@@ -12,7 +12,7 @@ function RegisterPage() {
     e.preventDefault();
     setMessage('');
     try {
-      const response = await api.post('/register', { username, password });
+      const response = await api.post('/auth/register', { username, password });
       setMessage(response.data.message);
       setTimeout(() => {
         navigate('/login');

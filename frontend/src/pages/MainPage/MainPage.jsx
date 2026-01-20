@@ -12,7 +12,7 @@ function LoginPage() {
     e.preventDefault();
     setMessage('');
     try {
-      const response = await api.post('/login', { username, password });
+      const response = await api.post('/auth/login', { username, password });
       
       setMessage('Login successful! Redirecting...');
       
