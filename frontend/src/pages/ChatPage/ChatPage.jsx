@@ -16,8 +16,11 @@ function ChatPage() {
     const [messageInput, setMessageInput] = useState("");
     const [error, setError] = useState("");
     const [isConnected, setIsConnected] = useState(false);
+    const [typingUsers, setTypingUsers] = useState([]);
     const chatMessagesRef = useRef(null);
     const socketRef = useRef(null);
+    const typingTimeoutRef = useRef(null);
+    const isTypingRef = useRef(false);
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -63,6 +66,19 @@ function ChatPage() {
             setMessages((prev) => [...prev, message]);
         });
 
+        socket.on('userTyping', ({ username }) => {
+            setTypingUsers((prev) => {
+                if (!prev.includes(username)) {
+                    return [...prev, username];
+                }
+                return prev;
+            });
+        });
+
+        socket.on('userStopTyping', ({ username }) => {
+            setTypingUsers((prev) => prev.filter(u => u !== username));
+        });
+
         return () => {
             socket.emit('leaveRoom', room);
             socket.disconnect();
@@ -82,9 +98,39 @@ function ChatPage() {
         }
     };
 
+    const handleInputChange = (e) => {
+        setMessageInput(e.target.value);
+        
+        if (!socketRef.current) return;
+        
+        if (!isTypingRef.current && e.target.value.trim()) {
+            isTypingRef.current = true;
+            socketRef.current.emit('typing', { room, username: user?.username });
+        }
+        
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+        
+        typingTimeoutRef.current = setTimeout(() => {
+            if (isTypingRef.current) {
+                isTypingRef.current = false;
+                socketRef.current?.emit('stopTyping', { room, username: user?.username });
+            }
+        }, 2000);
+    };
+
     const handleSendMessage = (e) => {
         e.preventDefault();
         if (!messageInput.trim() || !socketRef.current) return;
+
+        if (isTypingRef.current) {
+            isTypingRef.current = false;
+            socketRef.current.emit('stopTyping', { room, username: user?.username });
+        }
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
 
         socketRef.current.emit('chatMessage', {
             room,
@@ -156,13 +202,26 @@ function ChatPage() {
                         );
                     })}
                 </div>
+                {typingUsers.length > 0 && (
+                    <div className="typing-indicator">
+                        <span className="typing-dots">
+                            <span></span><span></span><span></span>
+                        </span>
+                        {typingUsers.length === 1 
+                            ? `${typingUsers[0]} is typing...`
+                            : typingUsers.length === 2
+                            ? `${typingUsers[0]} and ${typingUsers[1]} are typing...`
+                            : `${typingUsers.length} people are typing...`
+                        }
+                    </div>
+                )}
                 <form id="chat-form" onSubmit={handleSendMessage}>
                     <input 
                         type="text" 
                         id="msg" 
                         placeholder="Type a message..." 
                         value={messageInput}
-                        onChange={(e) => setMessageInput(e.target.value)}
+                        onChange={handleInputChange}
                         required 
                     />
                     <button type="submit">Send</button>

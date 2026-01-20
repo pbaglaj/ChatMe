@@ -27,8 +27,6 @@ let rooms = [
 let roomIdCounter = 3;
 
 io.on('connection', (socket) => {
-    console.log('New WebSocket connection:', socket.id);
-
     socket.on('joinRoom', (room) => {
         socket.join(room);
         console.log(`User ${socket.id} joined the room: ${room}`);
@@ -67,6 +65,14 @@ io.on('connection', (socket) => {
         messages[room].push(newMessage);
         
         io.to(room).emit('message', newMessage);
+    });
+
+    socket.on('typing', ({ room, username }) => {
+        socket.to(room).emit('userTyping', { username });
+    });
+
+    socket.on('stopTyping', ({ room, username }) => {
+        socket.to(room).emit('userStopTyping', { username });
     });
 
     socket.on('disconnect', () => {
