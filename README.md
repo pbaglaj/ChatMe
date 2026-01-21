@@ -32,7 +32,18 @@ git clone https://github.com/pbaglaj/ChatMe.git
 cd ChatMe
 ```
 
-### 2. Set up the Backend
+### 2. Database Setup
+Before starting the server, you need to initialize your PostgreSQL database.
+
+1. Create a database named `chatme` in your PostgreSQL instance.
+2. Run the schema file to create the necessary tables:
+
+```bash
+# From the project root
+psql -U your_postgres_user -d chatme -f backend/db/schema.sql
+```
+
+### 3. Set up the Backend
 
 ```bash
 cd backend
@@ -55,7 +66,7 @@ node server.js
 
 The backend will run on `http://localhost:3000`
 
-### 3. Set up the Frontend
+### 4. Set up the Frontend
 
 Open a new terminal:
 
@@ -77,10 +88,21 @@ The frontend will run on `http://localhost:5173`
 ```
 ChatMe/
 ├── backend/
+│   ├── api/                # API route handlers
+│   │   ├── auth.js
+│   │   ├── friends.js
+│   │   ├── messages.js
+│   │   ├── notifications.js
+│   │   ├── posts.js
+│   │   ├── profile.js
+│   │   ├── rooms.js
+│   │   └── users.js
 │   ├── config/
 │   │   └── db.js           # PostgreSQL connection
 │   ├── controllers/
 │   │   └── auth_controller.js
+│   ├── db/                 # Database scripts
+│   │   └── schema.sql      # Database structure (DDL)
 │   ├── middleware/
 │   │   └── auth_middleware.js
 │   ├── server.js           # Express & Socket.io server
