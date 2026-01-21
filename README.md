@@ -58,13 +58,22 @@ JWT_SECRET=your_jwt_secret_key
 PORT=3000
 ```
 
+Generate SSL certificates for HTTPS:
+
+```bash
+mkdir -p certs
+cd certs
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server.key -out server.crt -subj "//CN=localhost"
+cd ..
+```
+
 Start the backend server:
 
 ```bash
 node server.js
 ```
 
-The backend will run on `http://localhost:3000`
+The backend will run on `https://localhost:3000` (HTTPS with TLS)
 
 ### 4. Set up the Frontend
 
