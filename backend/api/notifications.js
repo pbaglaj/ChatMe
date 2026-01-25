@@ -36,7 +36,6 @@ router.get('/stream', async (req, res) => {
         if (sseClients) {
             sseClients.set(userId, res);
         }
-        console.log(`SSE client connected: user ${userId}`);
 
         const heartbeatInterval = setInterval(() => {
             res.write(`data: ${JSON.stringify({ type: 'heartbeat', time: new Date().toISOString() })}\n\n`);
@@ -47,7 +46,6 @@ router.get('/stream', async (req, res) => {
             if (sseClients) {
                 sseClients.delete(userId);
             }
-            console.log(`SSE client disconnected: user ${userId}`);
         });
     } catch (err) {
         console.error('SSE error:', err);

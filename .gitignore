@@ -16,6 +16,10 @@ frontend/.env.development.local
 frontend/.env.test.local
 frontend/.env.production.local
 
+# Certificates
+backend/certs/
+*.pem
+
 # Dependencies
 **/node_modules/
 

@@ -55,8 +55,18 @@ Create a `.env` file in the `backend` directory:
 ```env
 DATABASE_URL=postgresql://username:password@localhost:5432/chatme
 JWT_SECRET=your_jwt_secret_key
-PORT=3000
+PORT=5000
 ```
+
+Generate SSL certificates for HTTPS:
+
+First install mkcert: https://github.com/FiloSottile/mkcert
+
+```bash
+mkdir -p certs
+mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost 127.0.0.1 ::1
+```
+
 
 Start the backend server:
 
@@ -64,7 +74,7 @@ Start the backend server:
 node server.js
 ```
 
-The backend will run on `http://localhost:3000`
+The backend will run on `https://localhost:5000`
 
 ### 4. Set up the Frontend
 
@@ -81,7 +91,7 @@ Start the development server:
 npm run dev
 ```
 
-The frontend will run on `http://localhost:5173`
+The frontend will run on `https://localhost:5173`
 
 ## Project Structure
 
@@ -154,7 +164,7 @@ ChatMe/
 |----------|-------------|
 | `DATABASE_URL` | PostgreSQL connection string |
 | `JWT_SECRET` | Secret key for JWT tokens |
-| `PORT` | Server port (default: 3000) |
+| `PORT` | Server port (default: 5000) |
 
 ## License
 

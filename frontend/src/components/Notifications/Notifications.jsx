@@ -4,7 +4,7 @@ import { faBell } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../context/AuthContext';
 import './Notifications.css';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://localhost:5000/api';
 
 function Notifications() {
   const { isLoggedIn } = useAuth();

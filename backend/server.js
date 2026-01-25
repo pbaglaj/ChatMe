@@ -1,23 +1,34 @@
 const express = require('express');
 const cors = require('cors');
-const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
 require('dotenv').config();
 
 const app = express();
-const server = http.createServer(app);
+
+const options = {
+  key: fs.readFileSync(path.join(__dirname, 'certs/key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, 'certs/cert.pem'))
+};
+
+const server = https.createServer(options, app)
+
 const io = require('socket.io')(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: "https://localhost:5173",
         methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true
     }
 });
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "https://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 })); 
+
+
 
 app.use(express.json());
 
@@ -58,7 +69,6 @@ const getMessages = () => roomsRoutes.getMessages();
 io.on('connection', (socket) => {
     socket.on('joinRoom', (room) => {
         socket.join(room);
-        console.log(`User ${socket.id} joined the room: ${room}`);
         
         const messages = getMessages();
         const roomMessages = messages[room] || [];
@@ -73,7 +83,6 @@ io.on('connection', (socket) => {
 
     socket.on('leaveRoom', (room) => {
         socket.leave(room);
-        console.log(`User ${socket.id} left the room: ${room}`);
         
         socket.to(room).emit('message', {
             user: 'System',
@@ -105,13 +114,9 @@ io.on('connection', (socket) => {
     socket.on('stopTyping', ({ room, username }) => {
         socket.to(room).emit('userStopTyping', { username });
     });
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
-    });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`HTTPS Server running on port ${PORT}`);
 });
