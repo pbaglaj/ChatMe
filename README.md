@@ -9,18 +9,22 @@ A real-time chat application built with React and Node.js, featuring WebSocket c
 - React Router for navigation
 - Socket.io-client for real-time communication
 - Axios for HTTP requests
+- Font Awesome icons
 
 **Backend:**
 - Node.js with Express 5
 - Socket.io for WebSocket connections
+- Server-Sent Events (SSE) for real-time notifications
 - PostgreSQL database
 - JWT authentication
 - bcrypt for password hashing
+- HTTPS with self-signed certificates
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or higher recommended)
 - [PostgreSQL](https://www.postgresql.org/) database
+- [mkcert](https://github.com/FiloSottile/mkcert) for generating SSL certificates
 - npm or yarn package manager
 
 ## Quick Start
@@ -107,6 +111,9 @@ ChatMe/
 │   │   ├── profile.js
 │   │   ├── rooms.js
 │   │   └── users.js
+│   ├── certs/              # SSL certificates (generated)
+│   │   ├── cert.pem
+│   │   └── key.pem
 │   ├── config/
 │   │   └── db.js           # PostgreSQL connection
 │   ├── controllers/
@@ -115,7 +122,7 @@ ChatMe/
 │   │   └── schema.sql      # Database structure (DDL)
 │   ├── middleware/
 │   │   └── auth_middleware.js
-│   ├── server.js           # Express & Socket.io server
+│   ├── server.js           # Express & Socket.io HTTPS server
 │   └── package.json
 ├── frontend/
 │   ├── src/
@@ -133,11 +140,16 @@ ChatMe/
 
 ## Features
 
-- 🔐 User authentication (Register/Login)
+- 🔐 User authentication (Register/Login with JWT)
 - 💬 Real-time messaging with WebSockets
 - 🚪 Chat rooms support
-- 👤 User profiles
+- 👤 User profiles with customization
+- 👥 Friends system (add/remove friends)
+- 📝 Posts feed
+- 🔔 Real-time notifications (SSE)
+- 🔍 User search
 - 📜 Message history
+- 🔒 Secure HTTPS connections
 
 ## Available Scripts
 
