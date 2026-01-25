@@ -4,10 +4,10 @@ import { io } from "socket.io-client";
 import { useAuth } from "../../context/AuthContext";
 import "./ChatPage.css";
 
-const SOCKET_URL = "https://localhost:3000";
+const SOCKET_URL = "http://localhost:5000";
 
 function ChatPage() {
-    const { id } = useParams();
+    const { id } = useParams(); // id is the room name
     const navigate = useNavigate();
     const { isLoggedIn, user } = useAuth();
     const [room, setRoom] = useState(id || "");

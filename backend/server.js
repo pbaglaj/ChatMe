@@ -1,37 +1,20 @@
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
 require('dotenv').config();
 
-const sslOptions = {
-    key: fs.readFileSync(path.join(__dirname, 'certs', 'server.key')),
-    cert: fs.readFileSync(path.join(__dirname, 'certs', 'server.crt'))
-};
-
 const app = express();
-
-let server;
-try {
-    server = https.createServer(sslOptions, app);
-    console.log('HTTPS server created with TLS');
-} catch (err) {
-    console.warn('SSL certificates not found, falling back to HTTP');
-    server = http.createServer(app);
-}
-
+const server = http.createServer(app);
 const io = require('socket.io')(server, {
     cors: {
-        origin: ["http://localhost:5173", "https://localhost:5173"],
+        origin: "http://localhost:5173",
         methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true
     }
 });
 
 app.use(cors({
-    origin: ["http://localhost:5173", "https://localhost:5173"],
+    origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 })); 
@@ -128,8 +111,7 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
-const PROTOCOL = server instanceof https.Server ? 'https' : 'http';
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-    console.log(`Server running on ${PROTOCOL}://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

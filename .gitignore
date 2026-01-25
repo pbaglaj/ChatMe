@@ -16,9 +16,6 @@ frontend/.env.development.local
 frontend/.env.test.local
 frontend/.env.production.local
 
-# SSL Certificates
-backend/certs/
-
 # Dependencies
 **/node_modules/
 
