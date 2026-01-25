@@ -1,4 +1,4 @@
-# ChatMe 💬
+# ChatMe
 
 A real-time chat application built with React and Node.js, featuring WebSocket communication for instant messaging.
 
@@ -140,16 +140,16 @@ ChatMe/
 
 ## Features
 
-- 🔐 User authentication (Register/Login with JWT)
-- 💬 Real-time messaging with WebSockets
-- 🚪 Chat rooms support
-- 👤 User profiles with customization
-- 👥 Friends system (add/remove friends)
-- 📝 Posts feed
-- 🔔 Real-time notifications (SSE)
-- 🔍 User search
-- 📜 Message history
-- 🔒 Secure HTTPS connections
+- User authentication (Register/Login with JWT)
+- Real-time messaging with WebSockets
+- Chat rooms support
+- User profiles with customization
+- Friends system (add/remove friends)
+- Posts feed
+- Real-time notifications (SSE)
+- User search
+- Message history
+- Secure HTTPS connections
 
 ## Available Scripts
 
