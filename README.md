@@ -1,29 +1,36 @@
 # ChatMe
 
-A real-time chat application built with React and Node.js, featuring WebSocket communication for instant messaging.
+A real-time chat application built with React and Node.js, featuring WebSocket communication for instant messaging and MQTT for user presence/status tracking.
 
 ## Tech Stack
 
 **Frontend:**
 - React 18 with Vite
 - React Router for navigation
-- Socket.io-client for real-time communication
+- Socket.io-client for real-time messaging
+- MQTT.js for user presence (online/offline status)
 - Axios for HTTP requests
 - Font Awesome icons
 
 **Backend:**
 - Node.js with Express 5
 - Socket.io for WebSocket connections
+- MQTT client for subscribing to user status updates
 - Server-Sent Events (SSE) for real-time notifications
 - PostgreSQL database
 - JWT authentication
 - bcrypt for password hashing
 - HTTPS with self-signed certificates
 
+**Infrastructure:**
+- Docker & Docker Compose
+- Eclipse Mosquitto MQTT Broker
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or higher recommended)
 - [PostgreSQL](https://www.postgresql.org/) database
+- [Docker](https://www.docker.com/) and Docker Compose
 - [mkcert](https://github.com/FiloSottile/mkcert) for generating SSL certificates
 - npm or yarn package manager
 
@@ -36,7 +43,26 @@ git clone https://github.com/pbaglaj/ChatMe.git
 cd ChatMe
 ```
 
-### 2. Database Setup
+### 2. Start MQTT Broker (Docker)
+
+Start the Mosquitto MQTT broker using Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+This will start the MQTT broker with:
+- **Port 1883**: MQTT protocol (for backend)
+- **Port 9001**: WebSocket protocol (for frontend)
+
+Verify the broker is running:
+
+```bash
+docker ps
+# Should show mqtt-broker container running
+```
+
+### 3. Database Setup
 Before starting the server, you need to initialize your PostgreSQL database.
 
 1. Create a database named `chatme` in your PostgreSQL instance.
@@ -47,7 +73,7 @@ Before starting the server, you need to initialize your PostgreSQL database.
 psql -U your_postgres_user -d chatme -f backend/db/schema.sql
 ```
 
-### 3. Set up the Backend
+### 4. Set up the Backend
 
 ```bash
 cd backend
@@ -80,7 +106,7 @@ node server.js
 
 The backend will run on `https://localhost:5000`
 
-### 4. Set up the Frontend
+### 5. Set up the Frontend
 
 Open a new terminal:
 
@@ -118,7 +144,7 @@ ChatMe/
 │   │   └── db.js           # PostgreSQL connection
 │   ├── controllers/
 │   │   └── auth_controller.js
-│   ├── db/                 # Database scripts
+│   ├── db/
 │   │   └── schema.sql      # Database structure (DDL)
 │   ├── middleware/
 │   │   └── auth_middleware.js
@@ -128,13 +154,19 @@ ChatMe/
 │   ├── src/
 │   │   ├── components/     # Reusable UI components
 │   │   ├── context/        # React context (AuthContext)
+│   │   ├── hooks/          # MQTT hooks for user presence
 │   │   ├── pages/          # Page components
 │   │   ├── services/       # API service layer
 │   │   ├── styles/         # Global styles
 │   │   ├── App.jsx
 │   │   └── main.jsx
 │   ├── index.html
+│   ├── vite.config.js
 │   └── package.json
+├── mosquitto/              # MQTT Broker configuration
+│   ├── config/
+│   │   └── mosquitto.conf  # Mosquitto settings
+├── docker-compose.yaml     # Docker services (MQTT broker)
 └── README.md
 ```
 
@@ -142,6 +174,7 @@ ChatMe/
 
 - User authentication (Register/Login with JWT)
 - Real-time messaging with WebSockets
+- Real-time user presence (online/offline) via MQTT
 - Chat rooms support
 - User profiles with customization
 - Friends system (add/remove friends)
@@ -168,15 +201,31 @@ ChatMe/
 |---------|-------------|
 | `node server.js` | Start the server |
 
+### Docker
+
+| Command | Description |
+|---------|-------------|
+| `docker-compose up -d` | Start MQTT broker |
+| `docker-compose down` | Stop MQTT broker |
+| `docker logs mqtt-broker` | View broker logs |
+
 ## Environment Variables
 
 ### Backend `.env`
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `JWT_SECRET` | Secret key for JWT tokens |
-| `PORT` | Server port (default: 5000) |
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | - |
+| `JWT_SECRET` | Secret key for JWT tokens | - |
+| `PORT` | Server port | `5000` |
+| `MQTT_BROKER_URL` | MQTT broker URL | `mqtt://localhost:1883` |
+
+## Troubleshooting
+
+### Backend can't connect to MQTT
+
+- If running backend locally (not in Docker), use `mqtt://localhost:1883`
+- If running backend in Docker, use `mqtt://mqtt-broker:1883`
 
 ## License
 
