@@ -9,23 +9,26 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment files - CRITICAL!
-backend/.env
-frontend/.env
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Certificates
 backend/certs/
 *.pem
 
+# Docker and Mosquitto files
+mosquitto/data/
+mosquitto/log/
+
 # Dependencies
-**/node_modules/
+node_modules/
 
 # Production files / builds
-**/dist/
-**/build/
+dist/
+build/
 .cache/
 
 # Editor temporary files
