@@ -3,6 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const mqtt = require('mqtt');
 require('dotenv').config();
 
 const app = express();
@@ -12,7 +13,7 @@ const options = {
   cert: fs.readFileSync(path.join(__dirname, 'certs/cert.pem'))
 };
 
-const server = https.createServer(options, app)
+const server = https.createServer(options, app);
 
 const io = require('socket.io')(server, {
     cors: {
@@ -27,8 +28,6 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 })); 
-
-
 
 app.use(express.json());
 
@@ -114,6 +113,46 @@ io.on('connection', (socket) => {
     socket.on('stopTyping', ({ room, username }) => {
         socket.to(room).emit('userStopTyping', { username });
     });
+});
+
+const MQTT_BROKER_URL = process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883';
+
+const mqttClient = mqtt.connect(MQTT_BROKER_URL, {
+    reconnectPeriod: 5000,
+    connectTimeout: 10000,
+});
+
+mqttClient.on('connect', () => {
+    console.log('[MQTT] Connected to MQTT broker successfully');
+
+    mqttClient.subscribe('users/+/status', (err) => {
+        if (err) {
+            console.error('[MQTT] Failed to subscribe to user status topics:', err);
+        }
+    });
+});
+
+mqttClient.on('error', (err) => {
+    console.error('[MQTT] Connection error:', err.message);
+});
+
+mqttClient.on('offline', () => {
+    console.log('[MQTT] Client is offline');
+});
+
+mqttClient.on('reconnect', () => {
+    console.log('[MQTT] Attempting to reconnect...');
+});
+
+mqttClient.on('close', () => {
+    console.log('[MQTT] Connection closed');
+});
+
+mqttClient.on('message', (topic, message) => {
+    const userId = topic.split('/')[1];
+    const status = message.toString();
+
+    io.emit('userStatus', { userId, status });
 });
 
 const PORT = 5000;
