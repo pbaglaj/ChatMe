@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { usePublishMyStatus } from '../hooks/useMqttStatus';
 
 const AuthContext = createContext(null);
 
@@ -47,6 +48,8 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         navigate('/');
     };
+
+    usePublishMyStatus(user?.user_id);
 
     if (loading) {
         return <div>Loading...</div>;

@@ -3,12 +3,15 @@ import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import './ProfileHeader.css';
 
+import { useMqttStatus } from '../../hooks/useMqttStatus';
+
 function ProfileHeader({ username, username_id, bio, friendsCount = 0, posts = [], isOwnProfile, getInitial, onFriendAdded, onBioUpdated }) {
   const [editing, setEditing] = useState(false);
   const [bioText, setBioText] = useState(bio || '');
   const [friendMessage, setFriendMessage] = useState('');
   const [isFriend, setIsFriend] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const status = useMqttStatus(username_id);
 
   useEffect(() => {
     setBioText(bio || '');
@@ -75,9 +78,16 @@ function ProfileHeader({ username, username_id, bio, friendsCount = 0, posts = [
 
   return (
     <div className="profile-header">
-        <div className="profile-avatar">{getInitial(username)}</div>
+        <div className="profile-avatar-container">
+          <div className="profile-avatar">{getInitial(username)}</div>
+          <span className={`status-indicator ${status === 'online' ? 'online' : 'offline'}`}></span>
+        </div>
         <h1 className="profile-username">{username}</h1>
         <p className="profile-id">@{username_id}</p>
+        <p className="profile-status">
+          <span className={`status-dot ${status === 'online' ? 'online' : 'offline'}`}></span>
+          {status === 'online' ? 'Online' : 'Offline'}
+        </p>
         <div className='profile-bio'>{editing ? (
           <input 
             type="text" 

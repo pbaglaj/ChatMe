@@ -82,3 +82,56 @@
     font-size: 0.8rem;
     color: #888;
 }
+
+.profile-avatar-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.profile-avatar-container .profile-avatar {
+    margin-bottom: 0;
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.status-indicator.online {
+    background-color: #28a745;
+}
+
+.status-indicator.offline {
+    background-color: #6c757d;
+}
+
+.profile-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-dot.online {
+    background-color: #28a745;
+}
+
+.status-dot.offline {
+    background-color: #6c757d;
+}
