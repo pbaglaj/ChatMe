@@ -34,3 +34,9 @@ build/
 # Editor temporary files
 .vscode/
 .idea/
+
+# Python virtual environments
+venv/
+
+# Python bytecode
+__pycache__/
