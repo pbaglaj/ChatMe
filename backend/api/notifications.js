@@ -10,7 +10,7 @@ const setSseClients = (clients) => {
 
 router.get('/stream', async (req, res) => {
     try {
-        const token = req.query.token || req.header('Authorization')?.split(' ')[1];
+        const token = req.cookies?.auth_token || req.query.token || req.header('Authorization')?.split(' ')[1];
         
         if (!token) {
             return res.status(401).json({ message: "No token, authorization denied" });
@@ -28,7 +28,8 @@ router.get('/stream', async (req, res) => {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
-        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Origin', 'https://localhost:5173');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.flushHeaders();
 
         res.write(`data: ${JSON.stringify({ type: 'connected', message: 'Connected to notifications' })}\n\n`);

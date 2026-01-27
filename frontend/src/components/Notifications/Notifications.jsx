@@ -22,29 +22,52 @@ function Notifications() {
       return;
     }
 
-    const token = sessionStorage.getItem('token');
-    if (!token) return;
-
-    const eventSource = new EventSource(`${API_URL}/notifications/stream?token=${encodeURIComponent(token)}`);
-    eventSourceRef.current = eventSource;
-
-    eventSource.onmessage = (event) => {
+    const abortController = new AbortController();
+    
+    const connectSSE = async () => {
       try {
-        const data = JSON.parse(event.data);
-        handleNotification(data);
-      } catch (e) {
-        console.error('Failed to parse SSE message:', e);
+        const response = await fetch(`${API_URL}/notifications/stream`, {
+          credentials: 'include',
+          signal: abortController.signal,
+        });
+
+        if (!response.ok) {
+          console.error('SSE connection failed:', response.status);
+          return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const text = decoder.decode(value);
+          const lines = text.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                handleNotification(data);
+              } catch (e) {
+                console.error('Failed to parse SSE message:', e);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('SSE error:', error);
+        }
       }
     };
 
-    eventSource.onerror = (error) => {
-      console.error('SSE error:', error);
-      eventSource.close();
-    };
+    connectSSE();
 
     return () => {
-      eventSource.close();
-      eventSourceRef.current = null;
+      abortController.abort();
     };
   }, [isLoggedIn]);
 
