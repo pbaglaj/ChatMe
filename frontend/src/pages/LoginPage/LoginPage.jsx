@@ -12,12 +12,12 @@ function LoginPage() {
     e.preventDefault();
     setMessage('');
     try {
-      const response = await api.post('/auth/login', { username, password });
+      await api.post('/auth/login', { username, password });
       
       setMessage('Login successful! Redirecting...');
       
       setTimeout(() => {
-        login(response.data.token);
+        login();
       }, 1000); 
 
     } catch (error) {

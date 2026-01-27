@@ -11,24 +11,24 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const checkLoggedIn = async () => {
-            const token = sessionStorage.getItem('token');
-            if (token) {
-                try {
-                    const response = await api.get('/profile');
+        const checkSession = async () => {
+            try {
+                const response = await api.get('/auth/check');
+                if (response.data.loggedIn) {
                     setUser(response.data.user);
-                } catch (error) {
-                    console.error("Auth check failed", error);
-                    sessionStorage.removeItem('token');
+                } else {
+                    setUser(null);
                 }
+            } catch (error) {
+                console.error("Session check failed", error);
+                setUser(null);
             }
             setLoading(false);
         };
-        checkLoggedIn();
+        checkSession();
     }, []);
 
-    const login = async (token) => {
-        sessionStorage.setItem('token', token);
+    const login = async () => {
         try {
             const response = await api.get('/profile');
             setUser(response.data.user);
@@ -44,7 +44,6 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error("Logout request failed", error);
         }
-        sessionStorage.removeItem('token');
         setUser(null);
         navigate('/');
     };

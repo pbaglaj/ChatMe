@@ -68,7 +68,14 @@ exports.login = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        res.status(200).json({ token });
+        res.cookie('auth_token', token, {
+            httpOnly: true,
+            secure: false,
+            maxAge: 3600000, // 1 hour
+            sameSite: 'lax'
+        });
+
+        res.status(200).json({ message: 'Login successful' });
 
     } catch (err) {
         console.error(err);
