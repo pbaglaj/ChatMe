@@ -123,6 +123,47 @@ npm run dev
 
 The frontend will run on `https://localhost:5173`
 
+### Testing
+The project includes a comprehensive test suite written in Python, covering unit, API, behavior-driven (BDD), and performance testing.
+
+## Prerequisites for Testing
+
+Install the required Python packages:
+
+```bash
+pip install pytest requests behave locust
+```
+## 1. Unit & API Tests
+
+Run unit tests (for backend logic) and API integration tests using `pytest`:
+
+```bash
+# Run all unit and API tests
+pytest
+
+# Run only unit tests
+pytest tests/unit
+
+# Run only API tests (ensure backend is running)
+pytest tests/api
+```
+
+## 2. Behavior Driven Development (BDD) Tests
+
+Run feature tests using `behave`. Ensure the backend server is running before executing these tests.
+
+```bash
+behave tests/features
+```
+
+## 3. Performance tests
+
+Load testing is performed using `locust`.
+
+```bash
+locust -f tests/performance/test_perf.py
+```
+
 ## Project Structure
 
 ```
@@ -166,6 +207,13 @@ ChatMe/
 ├── mosquitto/              # MQTT Broker configuration
 │   ├── config/
 │   │   └── mosquitto.conf  # Mosquitto settings
+├── tests/                  # Test Suite
+│   ├── api/                # API integration tests
+│   ├── features/           # BDD feature files (Behave)
+│   │   └── steps/          # Step definitions
+│   ├── performance/        # Load tests (Locust)
+│   ├── unit/               # Unit tests
+│   └── pytest.ini          # Pytest configuration
 ├── docker-compose.yaml     # Docker services (MQTT broker)
 └── README.md
 ```
