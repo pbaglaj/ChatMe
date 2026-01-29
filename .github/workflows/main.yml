@@ -63,8 +63,8 @@ jobs:
 
     # 7. UNIT TESTS (Mockowane - nie wymagają bazy ani uruchomionego serwera)
     - name: Run Unit Tests (Python Mocks)
-      run: python -m unittest tests/unit_tests.py
-      # Zakładam, że zapisałeś poprzednie unittesty w tests/unit_tests.py
+      run: python -m unittest tests/unit/test_app.py
+      # Zakładam, że zapisałeś poprzednie unittesty w tests/unit/test_app.py
 
     # 8. Przygotowanie Bazy Danych (Migracja schematu)
     - name: Setup Database Schema
@@ -102,4 +102,4 @@ jobs:
     - name: Run Performance Test
       # Uruchamiamy test przez 10 sekund z 1000 użytkownikami
       run: |
-        locust -f tests/performance/locustfile.py --headless -u 1000 -r 2 --run-time 10s --host=https://localhost:5000
+        locust -f tests/performance/test_perf.py --headless -u 1000 -r 2 --run-time 10s --host=https://localhost:5000
