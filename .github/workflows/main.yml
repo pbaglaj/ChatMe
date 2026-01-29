@@ -1,0 +1,105 @@
+name: ChatMe CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    # Usługa bazy danych dostępna dla kroków w kontenerze
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: chatme
+        ports:
+          - 5432:5432
+        # Healthcheck upewnia się, że baza wstała zanim ruszą testy
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    # 1. Pobranie kodu
+    - uses: actions/checkout@v3
+
+    # 2. Konfiguracja Node.js (dla Backend)
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    # 3. Konfiguracja Python (dla Testów)
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    # 4. Instalacja zależności Backendu
+    - name: Install Backend Dependencies
+      working-directory: ./backend
+      run: npm install
+
+    # 5. Instalacja zależności Python (Testy)
+    - name: Install Python Test Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pytest behave locust
+
+    # 6. Generowanie certyfikatów SSL (Wymagane przez server.js)
+    - name: Generate Dummy SSL Certificates
+      working-directory: ./backend
+      run: |
+        mkdir -p certs
+        openssl req -nodes -new -x509 -keyout certs/key.pem -out certs/cert.pem -days 365 -subj "/C=PL/ST=Pomerania/L=Rumia/O=ChatMe/CN=localhost"
+
+    # 7. UNIT TESTS (Mockowane - nie wymagają bazy ani uruchomionego serwera)
+    - name: Run Unit Tests (Python Mocks)
+      run: python -m unittest tests/unit_tests.py
+      # Zakładam, że zapisałeś poprzednie unittesty w tests/unit_tests.py
+
+    # 8. Przygotowanie Bazy Danych (Migracja schematu)
+    - name: Setup Database Schema
+      env:
+        PGPASSWORD: password
+      run: |
+        psql -h localhost -U postgres -d chatme -f backend/db/schema.sql
+
+    # 9. Uruchomienie Backendu w tle
+    - name: Start Backend Server
+      working-directory: ./backend
+      env:
+        DB_USER: postgres
+        DB_PASSWORD: password
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: chatme
+        JWT_SECRET: supersecretkeyforci
+        MQTT_BROKER_URL: mqtt://test.mosquitto.org 
+        # Używamy publicznego brokera lub mocka dla MQTT, żeby serwer nie padł przy starcie
+      run: |
+        npm start &
+        echo "Waiting for server to start..."
+        sleep 10 # Czekamy aż Express wstanie na porcie 5000
+
+    # 10. API TESTS (Requests)
+    - name: Run API Tests
+      run: pytest tests/api/test_auth_api.py
+
+    # 11. BDD TESTS (Behave)
+    - name: Run BDD Tests
+      run: behave
+
+    # 12. PERFORMANCE TESTS (Locust Headless)
+    - name: Run Performance Test
+      # Uruchamiamy test przez 10 sekund z 1000 użytkownikami
+      run: |
+        locust -f tests/performance/locustfile.py --headless -u 1000 -r 2 --run-time 10s --host=https://localhost:5000
