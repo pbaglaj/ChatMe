@@ -38,5 +38,8 @@ build/
 # Python virtual environments
 venv/
 
-# Python bytecode
+# Python cache and coverage
 __pycache__/
+htmlcov/
+.coverage
+.pytest_cache/
