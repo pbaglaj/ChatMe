@@ -83,7 +83,7 @@ jobs:
       run: pytest tests/api/test_auth_api.py
 
     - name: Run BDD Tests
-      run: behave
+      run: behave tests/bdd/features/
 
     - name: Run Performance Test
       run: |
