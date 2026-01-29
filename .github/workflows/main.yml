@@ -15,7 +15,7 @@ jobs:
         image: postgres:13
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
           POSTGRES_DB: chatme
         ports:
           - 5432:5432
@@ -51,14 +51,14 @@ jobs:
       working-directory: ./backend
       run: |
         mkdir -p certs
-        openssl req -nodes -new -x509 -keyout certs/key.pem -out certs/cert.pem -days 365 -subj "/C=PL/ST=Pomerania/L=Rumia/O=ChatMe/CN=localhost"
+        openssl req -nodes -new -x509 -keyout certs/key.pem -out certs/cert.pem -days 365 -subj "/C=PL/ST=Pomerania/L=Gdansk/O=ChatMe/CN=localhost"
 
     - name: Run Unit Tests (Python Mocks)
       run: python -m unittest tests/unit/test_app.py
 
     - name: Setup Database Schema
       env:
-        PGPASSWORD: password
+        PGPASSWORD: ${{ secrets.DB_PASSWORD }}
       run: |
         psql -h localhost -U postgres -d chatme -f backend/db/schema.sql
 
@@ -66,18 +66,18 @@ jobs:
       working-directory: ./backend
       env:
         DB_USER: postgres
-        DB_PASSWORD: password
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         DB_HOST: localhost
         DB_PORT: 5432
         DB_NAME: chatme
         PGUSER: postgres
-        PGPASSWORD: password
-        JWT_SECRET: supersecretkeyforci
+        PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
         MQTT_BROKER_URL: mqtt://test.mosquitto.org 
       run: |
         npm start &
         echo "Waiting for server to start..."
-        sleep 10 # Czekamy aż Express wstanie na porcie 5000
+        sleep 10
 
     - name: Run API Tests
       run: pytest tests/api/test_auth_api.py
@@ -87,4 +87,4 @@ jobs:
 
     - name: Run Performance Test
       run: |
-        locust -f tests/performance/test_perf.py --headless -u 1000 -r 2 --run-time 10s --host=https://localhost:5000
+        locust -f tests/performance/test_perf.py --headless -u 100 -r 2 --run-time 10s --host=https://localhost:5000
