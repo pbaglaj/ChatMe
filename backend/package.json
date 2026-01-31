@@ -16,7 +16,8 @@
     "wait-on": "^9.0.3"
   },
   "scripts": {
-  "start": "node server.js",
-  "test": "jest --detectOpenHandles"
+    "start": "node server.js",
+    "test": "jest --detectOpenHandles",
+    "test:coverage": "jest --coverage"
   }
 }
