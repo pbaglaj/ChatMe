@@ -127,25 +127,27 @@ npm run dev
 The frontend will run on `https://localhost:5173`
 
 ### Testing
-The project includes a comprehensive test suite written in Python, covering unit, API, behavior-driven (BDD), and performance testing.
+The project includes a comprehensive test suite written in Python and JavaScript, covering unit, API, behavior-driven (BDD), and performance testing.
 
 ## Prerequisites for Testing
 
-Install the required Python packages:
+Install the required Python and JavaScript packages:
 
 ```bash
 pip install pytest requests behave locust
 ```
-## 1. Unit & API Tests
-
-Run unit tests (for backend logic) and API integration tests using `pytest`:
 
 ```bash
-# Run all unit and API tests
-pytest
+npm install jest
+```
 
-# Run only unit tests
-pytest tests/unit
+## 1. Unit & API Tests
+
+Run tests (for backend logic) and API integration tests using `pytest`:
+
+```bash
+# Run all tests
+pytest
 
 # Run only API tests (ensure backend is running)
 pytest tests/api
