@@ -53,8 +53,9 @@ jobs:
         mkdir -p certs
         openssl req -nodes -new -x509 -keyout certs/key.pem -out certs/cert.pem -days 365 -subj "/C=PL/ST=Pomerania/L=Gdansk/O=ChatMe/CN=localhost"
 
-    - name: Run Unit Tests (Python Mocks)
-      run: python -m unittest tests/unit/test_app.py
+    - name: Run Unit Tests (Jest)
+      working-directory: ./backend
+      run: npm test -- --coverage
 
     - name: Setup Database Schema
       env:
