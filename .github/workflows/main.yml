@@ -77,7 +77,7 @@ jobs:
       run: |
         npm start &
         echo "Waiting for server to start..."
-        npx wait-on https://localhost:5000 --timeout 60000
+        npx wait-on https://localhost:5000 --timeout 60000 --strictSSL false
 
     - name: Run API Tests
       run: pytest tests/api/test_auth_api.py
