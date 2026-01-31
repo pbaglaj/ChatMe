@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 
-let sseClients = null;
+let notificationService = null;
 
-const setSseClients = (clients) => {
-    sseClients = clients;
+router.setNotificationService = (service) => {
+    notificationService = service;
 };
 
 router.get('/stream', async (req, res) => {
@@ -34,8 +34,8 @@ router.get('/stream', async (req, res) => {
 
         res.write(`data: ${JSON.stringify({ type: 'connected', message: 'Connected to notifications' })}\n\n`);
 
-        if (sseClients) {
-            sseClients.set(userId, res);
+        if (notificationService) {
+            notificationService.clients.set(userId, res);
         }
 
         const heartbeatInterval = setInterval(() => {
@@ -44,8 +44,8 @@ router.get('/stream', async (req, res) => {
 
         req.on('close', () => {
             clearInterval(heartbeatInterval);
-            if (sseClients) {
-                sseClients.delete(userId);
+            if (notificationService) {
+                notificationService.clients.delete(userId);
             }
         });
     } catch (err) {
@@ -55,4 +55,3 @@ router.get('/stream', async (req, res) => {
 });
 
 module.exports = router;
-module.exports.setSseClients = setSseClients;

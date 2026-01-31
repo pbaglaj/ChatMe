@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const db = require('./config/db.js');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
@@ -42,14 +43,6 @@ const friendsRoutes = require('./api/friends.js');
 const notificationsRoutes = require('./api/notifications.js');
 const messagesRoutes = require('./api/messages.js');
 
-const NotificationService = require('./services/NotificationService');
-const notifications = new NotificationService(new Map());
-
-postsRoutes.setSendNotificationToUser(notifications.send);
-friendsRoutes.setSendNotificationToUser(notifications.send);
-notificationsRoutes.setSseClients(notifications.clients);
-messagesRoutes.setIo(io);
-
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/rooms', roomsRoutes);
@@ -60,6 +53,17 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/messages', messagesRoutes);
 
 const getMessages = () => roomsRoutes.getMessages();
+
+const NotificationService = require('./services/NotificationService');
+const PostService = require('./services/PostService');
+
+const notifications = new NotificationService(new Map());
+const postService = new PostService(db, notifications);
+
+postsRoutes.setPostService(postService);
+friendsRoutes.setSendNotificationToUser(notifications.send.bind(notifications));
+notificationsRoutes.setNotificationService(notifications);
+messagesRoutes.setIo(io);
 
 io.on('connection', (socket) => {
     socket.on('joinRoom', (room) => {
