@@ -1,12 +1,12 @@
 const express = require('express');
 const cors = require('cors');
+const db = require('./config/db.js');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const mqtt = require('mqtt');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
-
 
 const app = express();
 
@@ -34,15 +34,6 @@ const io = require('socket.io')(server, {
     }
 });
 
-const sseClients = new Map();
-
-function sendNotificationToUser(userId, notification) {
-    const client = sseClients.get(userId);
-    if (client) {
-        client.write(`data: ${JSON.stringify(notification)}\n\n`);
-    }
-}
-
 const authRoutes = require('./api/auth.js');
 const usersRoutes = require('./api/users.js');
 const roomsRoutes = require('./api/rooms.js');
@@ -51,11 +42,6 @@ const postsRoutes = require('./api/posts.js');
 const friendsRoutes = require('./api/friends.js');
 const notificationsRoutes = require('./api/notifications.js');
 const messagesRoutes = require('./api/messages.js');
-
-postsRoutes.setSendNotificationToUser(sendNotificationToUser);
-friendsRoutes.setSendNotificationToUser(sendNotificationToUser);
-notificationsRoutes.setSseClients(sseClients);
-messagesRoutes.setIo(io);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
@@ -67,6 +53,17 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/messages', messagesRoutes);
 
 const getMessages = () => roomsRoutes.getMessages();
+
+const NotificationService = require('./services/NotificationService');
+const PostService = require('./services/PostService');
+
+const notifications = new NotificationService(new Map());
+const postService = new PostService(db, notifications);
+
+postsRoutes.setPostService(postService);
+friendsRoutes.setSendNotificationToUser(notifications.send.bind(notifications));
+notificationsRoutes.setNotificationService(notifications);
+messagesRoutes.setIo(io);
 
 io.on('connection', (socket) => {
     socket.on('joinRoom', (room) => {

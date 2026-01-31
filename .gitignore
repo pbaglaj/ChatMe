@@ -43,3 +43,6 @@ __pycache__/
 htmlcov/
 .coverage
 .pytest_cache/
+
+# Jest
+coverage/

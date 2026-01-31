@@ -1,84 +1,52 @@
+const AuthService = require('../services/AuthService');
 const bcrypt = require('bcrypt');
 const db = require('../config/db');
-
-exports.register = async (req, res) => {
-    try {
-        const { username, password } = req.body;
-
-        if (!username || !password) {
-            return res.status(400).json({ message: "Username and password are required" });
-        }
-        
-        const userExists = await db.query("SELECT * FROM users WHERE username = $1", [username]);
-        if (userExists.rows.length > 0) {
-            return res.status(409).json({ message: "User with this username already exists" });
-        }
-
-        const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(password, salt);
-
-        const newUser = await db.query(
-            "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, user_id, username",
-            [username, passwordHash]
-        );
-
-        res.status(201).json({
-            message: "User successfully registered",
-            user: newUser.rows[0]
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Server error" });
-    }
-};
-
-
 const jwt = require('jsonwebtoken');
 
-exports.login = async (req, res) => {
-    try {
-        const { username, password } = req.body;
+const authService = new AuthService(db, bcrypt, jwt);
 
-        if (!username || !password) {
-            return res.status(400).json({ message: "Username and password are required" });
-        }
+class AuthController {
+    register = async (req, res) => {
+        try {
+            const { username, password } = req.body;
 
-        const userResult = await db.query("SELECT * FROM users WHERE username = $1", [username]);
-        if (userResult.rows.length === 0) {
-            return res.status(401).json({ message: "Invalid login credentials" });
-        }
-        const user = userResult.rows[0];
+            const newUser = await authService.register(username, password);
+            
+            res.status(201).json({
+                message: "User successfully registered",
+                user: newUser
+            });
 
-        const isMatch = await bcrypt.compare(password, user.password_hash);
-        if (!isMatch) {
-            return res.status(401).json({ message: "Invalid login credentials" });
-        }
-
-        const payload = {
-            user: {
-                id: user.id,
-                user_id: user.user_id
+        } catch (err) {
+            if (err.status) {
+                return res.status(err.status).json({ message: err.message });
             }
-        };
+            console.error(err);
+            res.status(500).json({ message: "Server error" });
+        }
+    };
 
-        const token = jwt.sign(
-            payload,
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
+    login = async (req, res) => {
+        try {
+            const { username, password } = req.body;
 
-        res.cookie('auth_token', token, {
-            httpOnly: true,
-            secure: false,
-            maxAge: 3600000, // 1 hour
-            sameSite: 'lax'
-        });
+            const token = await authService.login(username, password);
 
-        res.status(200).json({ message: 'Login successful' });
+            res.cookie('auth_token', token, {
+                httpOnly: true,
+                secure: false,
+                maxAge: 3600000, // 1 hour
+                sameSite: 'lax'
+            });
 
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Server error" });
+            res.status(200).json({ message: 'Login successful' });
+
+        } catch (err) {
+            if (err.status) {
+                return res.status(err.status).json({ message: err.message });
+            }
+        }
     }
-};
+}
+
+module.exports = new AuthController();

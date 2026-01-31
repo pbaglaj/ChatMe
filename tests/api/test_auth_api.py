@@ -1,5 +1,7 @@
+from urllib import response
 import requests
 import uuid
+import pytest
 
 BASE_URL = "https://localhost:5000/api/auth"
 
@@ -37,7 +39,7 @@ class TestAuthAPI:
         
         response = requests.post(f"{BASE_URL}/register", json=payload, verify=False)
         
-        assert response.status_code == 409
+        assert response.status_code == 400
         assert "User with this username already exists" in response.json()["message"]
 
     def test_login_success(self):
@@ -79,3 +81,49 @@ class TestAuthAPI:
         response = requests.post(f"{BASE_URL}/login", json=payload, verify=False)
         
         assert response.status_code == 401
+
+    @pytest.fixture
+    def logged_in_session(self):
+        session = requests.Session()
+        unique_id = str(uuid.uuid4())[:8]
+        username = f"sess_user_{unique_id}"
+        password = "Password123!"
+
+        requests.post(f"{BASE_URL}/register", json={
+            "username": username,
+            "password": password
+        }, verify=False)
+
+        login_res = session.post(f"{BASE_URL}/login", json={
+            "username": username,
+            "password": password
+        }, verify=False)
+        
+        assert login_res.status_code == 200
+        return session, username
+    
+    def test_logout_success(self, logged_in_session):
+        session, _ = logged_in_session
+        
+        logout_res = session.post(f"{BASE_URL}/logout", verify=False)
+        
+        assert logout_res.status_code == 200
+        assert logout_res.json()["message"] == "Logged out successfully"
+        
+        check_res = session.get(f"{BASE_URL}/check", verify=False)
+        
+        assert check_res.status_code == 200
+        assert check_res.json()["loggedIn"] is False
+
+    def test_check_not_logged_in(self):
+        response = requests.get(f"{BASE_URL}/check", verify=False)
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert data["loggedIn"] is False
+        assert "user" not in data
+
+    def test_logout_unauthorized(self):
+        response = requests.post(f"{BASE_URL}/logout", verify=False)
+
+        assert response.status_code in [401, 403]

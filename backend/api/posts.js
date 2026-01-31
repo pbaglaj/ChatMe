@@ -3,10 +3,10 @@ const router = express.Router();
 const db = require('../config/db.js');
 const authMiddleware = require('../middleware/auth_middleware.js');
 
-let sendNotificationToUser = null;
+let postService;
 
-const setSendNotificationToUser = (fn) => {
-    sendNotificationToUser = fn;
+router.setPostService = (service) => {
+    postService = service;
 };
 
 router.post('/', authMiddleware, async (req, res) => {
@@ -14,45 +14,16 @@ router.post('/', authMiddleware, async (req, res) => {
         const userId = req.user.id;
         const { content } = req.body;
 
-        if (!content || content.trim() === '') {
-            return res.status(400).json({ message: "Post content is required" });
-        }
+        const newPost = await postService.createPost(userId, content);
 
-        const result = await db.query(
-            "INSERT INTO posts (user_id, content) VALUES ($1, $2) RETURNING id, user_id, content, created_at",
-            [userId, content.trim()]
-        );
-
-        const userResult = await db.query(
-            "SELECT username FROM users WHERE id = $1",
-            [userId]
-        );
-        const username = userResult.rows[0]?.username || 'Someone';
-
-        const friendsResult = await db.query(
-            "SELECT friend_id FROM friends WHERE user_id = $1",
-            [userId]
-        );
-
-        if (sendNotificationToUser) {
-            friendsResult.rows.forEach(friend => {
-                sendNotificationToUser(friend.friend_id, {
-                    type: 'new_post',
-                    message: `${username} published a new post!`,
-                    from: username,
-                    postId: result.rows[0].id,
-                    preview: content.trim().substring(0, 50) + (content.length > 50 ? '...' : ''),
-                    time: new Date().toISOString()
-                });
-            });
-        }
-
-        res.status(201).json({
-            message: "Post created successfully",
-            post: result.rows[0]
+        res.status(201).json({ 
+            message: "Post created successfully", 
+            post: newPost 
         });
-
     } catch (err) {
+        if (err.status) {
+            return res.status(err.status).json({ message: err.message });
+        }
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
@@ -177,4 +148,3 @@ router.delete('/:post_id', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
-module.exports.setSendNotificationToUser = setSendNotificationToUser;
