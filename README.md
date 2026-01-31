@@ -163,6 +163,8 @@ Load testing is performed using `locust`.
 ```bash
 locust -f tests/performance/test_perf.py --host=https://localhost:5000
 ```
+
+```
 ChatMe/
 ├── backend/
 │   ├── api/                # API route handlers
