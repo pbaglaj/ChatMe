@@ -1,3 +1,6 @@
+**Author:** Paweł Bagłaj
+**Group:** 01
+
 # ChatMe
 
 A real-time chat application built with React and Node.js, featuring WebSocket communication for instant messaging and MQTT for user presence/status tracking.
@@ -146,6 +149,18 @@ pytest tests/unit
 
 # Run only API tests (ensure backend is running)
 pytest tests/api
+```
+
+Run unit tests in backend with Jest (in backend directory):
+
+```bash
+npm test
+```
+
+With coverage:
+
+```bash
+npm run test:coverage
 ```
 
 ## 2. Behavior Driven Development (BDD) Tests
