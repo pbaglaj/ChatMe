@@ -7,7 +7,6 @@ const mqtt = require('mqtt');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
-
 const app = express();
 
 app.use(cors({
@@ -34,15 +33,6 @@ const io = require('socket.io')(server, {
     }
 });
 
-const sseClients = new Map();
-
-function sendNotificationToUser(userId, notification) {
-    const client = sseClients.get(userId);
-    if (client) {
-        client.write(`data: ${JSON.stringify(notification)}\n\n`);
-    }
-}
-
 const authRoutes = require('./api/auth.js');
 const usersRoutes = require('./api/users.js');
 const roomsRoutes = require('./api/rooms.js');
@@ -52,9 +42,12 @@ const friendsRoutes = require('./api/friends.js');
 const notificationsRoutes = require('./api/notifications.js');
 const messagesRoutes = require('./api/messages.js');
 
-postsRoutes.setSendNotificationToUser(sendNotificationToUser);
-friendsRoutes.setSendNotificationToUser(sendNotificationToUser);
-notificationsRoutes.setSseClients(sseClients);
+const NotificationService = require('./services/NotificationService');
+const notifications = new NotificationService(new Map());
+
+postsRoutes.setSendNotificationToUser(notifications.send);
+friendsRoutes.setSendNotificationToUser(notifications.send);
+notificationsRoutes.setSseClients(notifications.clients);
 messagesRoutes.setIo(io);
 
 app.use('/api/auth', authRoutes);
