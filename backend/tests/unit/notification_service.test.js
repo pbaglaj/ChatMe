@@ -9,7 +9,7 @@ describe('NotificationService - Unit Tests', () => {
         notificationService = new NotificationService(mockClientsMap);
     });
 
-    it('powinien wysłać wiadomość w formacie SSE, jeśli użytkownik jest połączony', () => {
+    it('should send message if the user is connected in SSE format', () => {
         const userId = 'user-123';
         const testMessage = { type: 'new_post', text: 'Hello!' };
         
