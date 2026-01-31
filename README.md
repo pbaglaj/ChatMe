@@ -164,6 +164,7 @@ Load testing is performed using `locust`.
 locust -f tests/performance/test_perf.py --host=https://localhost:5000
 ```
 
+### Project Structure
 ```
 ChatMe/
 ├── backend/
